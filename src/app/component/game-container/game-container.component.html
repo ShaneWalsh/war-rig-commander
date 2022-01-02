@@ -1,0 +1,15 @@
+<div>
+  <canvas #canvasBG class="canvas-position"></canvas>
+  <canvas #canvasGround class="canvas-position"></canvas>
+  <canvas #canvasBGShadow class="canvas-position"></canvas>
+  <canvas #canvas class="canvas-position"></canvas>
+  <canvas #canvasTop class="canvas-position" id="canvasTop"></canvas>
+  <div class="canvas-position" style="top: 440px;">
+    <p>zVal:{{zVal}}</p>
+    <p>xVal:{{xVal}}</p>
+    <p>yVal:{{yVal}}</p>
+    <p>mouseX:{{mouseX}}</p>
+    <p>mouseY:{{mouseY}}</p>
+  </div>
+  <button type="button" (click)="button()" class="over-canvas">Click Me!</button>
+</div>

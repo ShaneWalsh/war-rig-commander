@@ -1,0 +1,12 @@
+.canvas-position {
+  position: absolute;
+}
+
+.game-container-center {
+  max-width: 640px;
+  margin: auto;
+}
+
+.over-canvas{
+  position: relative;
+}
