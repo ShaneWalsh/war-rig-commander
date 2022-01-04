@@ -1,6 +1,8 @@
+import { LevelInstance } from "./LevelInstance";
+
 // can easily add more values are required for game logic.
 export class LogicContext {
-  constructor(){}
+  constructor(public levelInstance:LevelInstance){}
 }
 
 // Default class for executing some game logic.

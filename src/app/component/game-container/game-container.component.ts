@@ -64,7 +64,7 @@ export class GameContainerComponent implements OnInit, OnDestroy {
     public update() {
       this.tickComplete = false;
       // execute logic first? Add logic manager and wire in logic executors, and let them run before drawing.
-      this.logicManagerService.update();
+      this.logicManagerService.update(this.levelManagerService.getCurrentLevel());
       this.displayManagerService.update();
       this.tickComplete = true;
     }

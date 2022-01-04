@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { LevelInstance } from './support/LevelInstance';
 import { LogicContext, LogicProcess } from './support/LogicProcess';
 
 
@@ -23,8 +24,8 @@ export class LogicManagerService {
 
   constructor() { }
 
-  public update() {
-    const logicContext = new LogicContext();
+  public update(levelInstance:LevelInstance) {
+    const logicContext = new LogicContext(levelInstance);
     this.logicProcesses.forEach( logicProcess => {
       logicProcess.update(logicContext);
     });

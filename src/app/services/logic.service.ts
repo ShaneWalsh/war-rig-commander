@@ -145,6 +145,18 @@ export class LogicService {
     this.drawLine(x,y+hY,x+hX,y,colour,ctx);
   }
 
+  /**
+   * Loop around on a value
+   * @param index the current index position
+   * @param length the maximum value before the loop resets to 0
+   * @param increment the amount to increment on each loop
+   * @returns
+   */
+   static incrementLoop(index: number, length: number, increment:number=1): number {
+    index = index+increment;
+    return (index >= length)?0:index;
+  }
+
 }
 
 
