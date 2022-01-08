@@ -1,6 +1,7 @@
 import { LogicService } from "src/app/services/logic.service";
 import { Drawer, DrawingContext } from "../manager/support/Drawer";
 import { LogicContext, LogicProcess } from "../manager/support/LogicProcess";
+import { TileEntity } from "../TileEntity";
 
 export class LevelMap implements Drawer, LogicProcess {
   map:MapTile[][];
@@ -80,11 +81,4 @@ export class MapTile {
   removeTileEntity(){this.tileEntity = null;}
   setTileEntity(tileEntity: TileEntity){this.tileEntity = tileEntity;}
 
-}
-
-/**
- * Anything than exists on a tile and is not just background. Unit, building etc
- */
-export interface TileEntity {
-  isPassable():boolean;
 }

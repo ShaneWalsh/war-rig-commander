@@ -1,34 +1,132 @@
+import { Condition } from "selenium-webdriver";
 import { LogicService } from "src/app/services/logic.service";
 import { LogicContext } from "../manager/support/LogicProcess";
 import { BotInstance } from "./BotInstance";
+import { LogicBlock } from "./logic/LogicBlock";
+import { LogicCondition } from "./logic/LogicCondition";
 
-export interface BotGoal {
 
-  update(botInstance:BotInstance, logicContext:LogicContext);
+/*
+The bot will consume and produce events.
+  e.g
+    When its in combat
+    When its damaged
+    When something is in range
+    When something is damaged
+    When something is destroyed
+  When these happen, they will be checked againist the bots current goal systems, they may change the behaviour.
+*/
 
-}
+// When - conditions - LogicBlock
+// Logic makes the decisions, actually does some action
+// Conditions simply move between LogicBlocks so the right one is active.
 
-export class BotGoalPatrol {
+/*
+Patrol: from a-z
+  When - attacked - pursue
 
-  private currentPoint = 0;
-  constructor(public points:{x,y}[]) {
-    // call AI here to workout more waypoints to get around obsticals?
+Pursue: get into firing range and stay there
+  When - targetless - complete
+
+Pursue: CUSTOM
+  When - targetless - complete
+  When - health < 50% - CUSTOM Sequence (Move to Point, then Patrol)
+
+*/
+
+export class LogicScenario {
+  constructor(
+    public seq:LogicSequence,
+    public possibleScenarios:{con:LogicCondition,scen:LogicScenario}[],
+    public clearSeqVariablesOnLoad:boolean = true,
+  ){}
+
+  update(logicContext:LogicContext):boolean {
+    return this.seq.update(logicContext);
   }
 
-  // is bot at the current point?
-    // no move there
-    // yes, then start moving towards the next point.
-  update(botInstance:BotInstance, logicContext:LogicContext){
-    let point = this.points[this.currentPoint];
+  /**
+   * Will be called before the scenario is used by an entity, can do any prep, clear variables.
+   * @param logicContext
+   */
+  prepScenario(logicContext:LogicContext){
+    if(this.clearSeqVariablesOnLoad) {
+      this.seq.prepSequence(logicContext);
+    }
+  }
 
-    if(botInstance.tileX == point.x && botInstance.tileY == point.y) {
-      this.currentPoint = LogicService.incrementLoop(this.currentPoint, this.points.length);
-      point = this.points[this.currentPoint];
+  checkScenario(logicContext:LogicContext):LogicScenario {
+    for(let i = 0; i < this.possibleScenarios.length; i++) {
+      const possibleScenario = this.possibleScenarios[i];
+      if(possibleScenario.con.checkCondition(logicContext)){
+        possibleScenario.scen.prepScenario(logicContext);
+        return possibleScenario.scen;
+      }
+    }
+    return this;
+  }
+}
+
+export class LogicSequence {
+  private logicSequenceId:string;
+  private logicVarBlockIndexId:string;
+
+  constructor (
+    public logicBlocks:LogicBlock[],
+    public loopBlocks:boolean=false,
+    public clearVariables:boolean=false,
+  ) {
+    this.logicSequenceId = 'lsi-'+ Date.now();
+    this.logicVarBlockIndexId = this.logicSequenceId+'-blockIndex'
+  }
+
+  update(logicContext: LogicContext):boolean {
+    let logicVarBlockIndex = logicContext.getLogicVariable(this.logicVarBlockIndexId);
+    if( logicVarBlockIndex === undefined || logicVarBlockIndex === null ) {
+      logicVarBlockIndex = 0;
     }
 
-    // move in the direction of the next waypoint
-      // when my centerx+y move out of the current tile, move me into the next tile.
+    // execute block logic and if complete update index
+    const block = this.logicBlocks[logicVarBlockIndex];
+    if(block.update(logicContext)) {
+      if( (logicVarBlockIndex+1) === this.logicBlocks.length && !this.logicBlocks){
+        return true; // Scenario complete
+      } else {
+        logicVarBlockIndex = LogicService.incrementLoop(logicVarBlockIndex,this.logicBlocks.length);
+      }
+    }
 
+    // the logic index may have changed, so always set it again
+    logicContext.setLogicVariable(this.logicVarBlockIndexId, logicVarBlockIndex);
+    return false;
+  }
+
+  prepSequence(logicContext: LogicContext) {
+    if(this.clearVariables){
+      // TODO loop on the map, find keys that start with logicSequenceId and remove them?
+      // TODO pass the seqId down to the logicBlocks so they can set variables as well?
+      // TODO set the seqID into the logicContext?
+    }
+  }
+}
+
+export interface BotGoal {
+  update(logicContext:LogicContext);
+}
+
+export class BotGoalSimple implements BotGoal {
+
+  constructor (
+    public currentGoal:LogicScenario,
+    public defaultGoal:LogicScenario, // fallback to somekind of endless scenario if everything is complete, like a sentry mode.
+    ) {
+  }
+
+  update(logicContext:LogicContext) {
+    this.currentGoal = this.currentGoal.checkScenario(logicContext);
+    if(this.currentGoal.update(logicContext)){
+      this.currentGoal = this.defaultGoal;
+    }
   }
 
 }

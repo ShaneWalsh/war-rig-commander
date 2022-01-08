@@ -1,6 +1,6 @@
 import { Drawer, DrawingContext } from "../manager/support/Drawer";
 import { LogicContext, LogicProcess } from "../manager/support/LogicProcess";
-import { TileEntity } from "../map/LevelMap";
+import { AbsTileEntity, EntityState, TileEntity } from "../TileEntity";
 import { BotBrain } from "./BotBrains";
 import { BotPart } from "./BotPart";
 
@@ -13,11 +13,10 @@ import { BotPart } from "./BotPart";
  *
  *
  */
-export class BotInstance implements Drawer, LogicProcess, TileEntity {
-
-  // A turret would implement all 3 for example
+export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, TileEntity {
+  // A turret would implement all 3 for example, and may have multiple weapons.
   private botWeapon:any[] = []; // todo weapons, range, damage, health, amno type etc
-  private botBrains:BotBrain[] = []; // anything with logic
+  private botBrains:BotBrain[] = []; // anything with logic, rotating, moving
   private botParts:BotPart[] = []; // anything that draws on the bot.
 
   // speed?
@@ -34,8 +33,10 @@ export class BotInstance implements Drawer, LogicProcess, TileEntity {
       // alignment? faction? player controlled?
       // group, e.g if you fire on one bot in a convoy, they will all know, and react.
     ) {
+      super();
       this.tryConfigValues(this.config);
   }
+
 
   update(logicContext: LogicContext) {
     this.botBrains.forEach(botBrain => {
@@ -53,10 +54,6 @@ export class BotInstance implements Drawer, LogicProcess, TileEntity {
     // draw base
     // draw extras
     // draw turret
-  }
-
-  isPassable(): boolean {
-    return false;
   }
 
   getSpeed():number {
