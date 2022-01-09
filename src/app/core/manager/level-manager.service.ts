@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { LogicService } from 'src/app/services/logic.service';
 import { KeyboardEventService } from '../../services/keyboard-event.service';
+import { BotGoalSimple } from '../bot/BotGoal';
+import { BotInstance } from '../bot/BotInstance';
+import { DrawTestBotPart } from '../bot/BotPart';
+import { LogicFactoryService } from '../factory/logic-factory.service';
 import { LevelMap } from '../map/LevelMap';
-import { Drawer, DrawingContext } from './support/Drawer';
 import { LevelInstance } from './support/LevelInstance';
-import { LogicContext, LogicProcess } from './support/LogicProcess';
 import { ManagerContext } from './support/ManagerContext';
 
 @Injectable({
@@ -105,6 +106,12 @@ class TestLevel extends LevelInstance {
     this.mc.logicManagerService.addLogicProcess(this.map);
 
     // create all of the buildings and units etc
+      // patrolling unit
+    let bi = new BotInstance({},2,3,1,1,2*32,3*32);
+    bi.setGoal(LogicFactoryService.makePatrol([{x:9,y:9}, {x:2,y:9}, {x:9,y:2}]));
+    bi.addPart(new DrawTestBotPart());
+    this.mc.displayManagerService.addDrawer(bi);
+    this.mc.logicManagerService.addLogicProcess(bi);
 
     // create the resources tracker
 
@@ -114,5 +121,8 @@ class TestLevel extends LevelInstance {
     this.mc.levelManagerService.getLevelLoadedSubject().next(this);
   }
 
+  public getMap(): LevelMap {
+    return this.map;
+  }
 }
 

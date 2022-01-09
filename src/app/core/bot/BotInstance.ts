@@ -1,7 +1,9 @@
-import { Drawer, DrawingContext } from "../manager/support/Drawer";
-import { LogicContext, LogicProcess } from "../manager/support/LogicProcess";
-import { AbsTileEntity, EntityState, TileEntity } from "../TileEntity";
+import { Drawer } from "../manager/support/Drawer";
+import { LogicProcess } from "../manager/support/LogicProcess";
+import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
+import { AbsTileEntity, TileEntity } from "../TileEntity";
 import { BotBrain } from "./BotBrains";
+import { BotGoal } from "./BotGoal";
 import { BotPart } from "./BotPart";
 
 /**
@@ -19,6 +21,8 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   private botBrains:BotBrain[] = []; // anything with logic, rotating, moving
   private botParts:BotPart[] = []; // anything that draws on the bot.
 
+  private botGoal:BotGoal; //primary brain for moving, deciding where to go, what to do. Not Sensos or guns etc
+
   // speed?
 
   constructor(
@@ -34,26 +38,49 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
       // group, e.g if you fire on one bot in a convoy, they will all know, and react.
     ) {
       super();
-      this.tryConfigValues(this.config);
+      this.tryConfigValues(["bTimer"]);
   }
 
 
   update(logicContext: LogicContext) {
+    logicContext.setBotInstance(this);
+    this.botGoal.update(logicContext); // this will move the body, so its the most important, should go first.
     this.botBrains.forEach(botBrain => {
-      botBrain.update(this,logicContext);
+      botBrain.think(logicContext);
     });
     // update goal ( move(waypoints), guard(stay within a certain range, unless under attack), escort, attack(move to within range), capture, load, unload, lay )
     // range?
     // update brains ( turret? )
+    logicContext.clearBotInstance();
   }
 
   draw(drawingContext: DrawingContext) {
+    drawingContext.setBotInstance(this);
     this.botParts.forEach(botPart => {
-      botPart.draw(this,drawingContext);
+      botPart.draw(drawingContext);
     });
     // draw base
     // draw extras
     // draw turret
+    drawingContext.clearBotInstance();
+  }
+
+  // TODO come back to these calcualtions when using images etc
+  getCenterX():number {
+    return this.posX+(16);
+  }
+  getCenterY():number {
+      return this.posY+(16);
+  }
+
+  setGoal(botGoal:BotGoal) {
+    this.botGoal = botGoal;
+  }
+  addBrain(botBrain:BotBrain){
+    this.botBrains.push(botBrain);
+  }
+  addPart(botPart:BotPart){
+    this.botParts.push(botPart);
   }
 
   getSpeed():number {
@@ -68,8 +95,6 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
     }
   }
 }
-
-
 
 /**
  * Planned bots

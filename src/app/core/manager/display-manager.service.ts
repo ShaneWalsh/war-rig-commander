@@ -4,8 +4,9 @@ import { MouseService } from 'src/app/services/mouse.service';
 import { ResizeService } from 'src/app/services/resize.service';
 import { UiSettings } from 'src/app/core/manager/support/UiSettings';
 import { CanvasContainer } from './support/CanvasContainer';
-import { Drawer, DrawingContext } from './support/Drawer';
+import { Drawer } from './support/Drawer';
 import { KeyboardEventService } from 'src/app/services/keyboard-event.service';
+import { DrawingContext } from './support/SharedContext';
 
 /**
  * Handles the drawers, and the UI resiszing etc. Doesnt deal with any specific drawing logic. It should be able to support, gameplay and menus etc.

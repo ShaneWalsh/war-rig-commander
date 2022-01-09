@@ -1,3 +1,4 @@
+import { LevelMap } from "../../map/LevelMap";
 import { ManagerContext } from "./ManagerContext";
 
 export abstract class LevelInstance {
@@ -7,4 +8,5 @@ export abstract class LevelInstance {
   }
 
   public abstract initLevel();
+  public abstract getMap():LevelMap;
 }

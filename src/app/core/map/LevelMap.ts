@@ -1,12 +1,14 @@
 import { LogicService } from "src/app/services/logic.service";
-import { Drawer, DrawingContext } from "../manager/support/Drawer";
-import { LogicContext, LogicProcess } from "../manager/support/LogicProcess";
+import { Drawer } from "../manager/support/Drawer";
+import { LogicProcess } from "../manager/support/LogicProcess";
+import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
 import { TileEntity } from "../TileEntity";
 
 export class LevelMap implements Drawer, LogicProcess {
-  map:MapTile[][];
-  tileSize = 32;
-  size = 90;
+  private map:MapTile[][];
+  private tileSize = 32;
+  private halfTileSize = this.tileSize/2;
+  private size = 90;
 
   constructor(){
     this.map = new Array();
@@ -18,11 +20,11 @@ export class LevelMap implements Drawer, LogicProcess {
       for(let j =0; j < this.size;j++){
         randomnessCounter++;
         if(randomnessCounter >= randomness){
-          this.map[i][j] = new MapTile("#00FFFF",false);
+          this.map[i][j] = new MapTile(this, i,j,"#00FFFF",false);
           randomnessCounter = 0;
           randomness = Math.floor((Math.random()*10)+1);
         } else {
-          this.map[i][j] = new MapTile("#00FF00");
+          this.map[i][j] = new MapTile(this, i,j,"#00FF00");
         }
       }
     }
@@ -63,22 +65,54 @@ export class LevelMap implements Drawer, LogicProcess {
 
   }
 
+  get(x: number, y: number):MapTile {
+    return this.map[x][y];
+  }
+
+  getTiles():MapTile[][] {
+    return this.map;
+  }
+
+  getTileSize():number {
+    return this.tileSize;
+  }
+  getHalfTileSize():number {
+    return this.halfTileSize;
+  }
 
 }
 
 export class MapTile {
   // terrain type for speed?
-
+  public posX:number;
+  public posY:number;
+  public centerX:number;
+  public centerY:number;
   public tileEntity: TileEntity;
 
   constructor(
+    map:LevelMap,
+    public x:number,
+    public y:number,
     public color:string,
     public passable:boolean = true ) {
-
+    this.updateCords(map);
   }
 
   // GETTER SETTER
   removeTileEntity(){this.tileEntity = null;}
   setTileEntity(tileEntity: TileEntity){this.tileEntity = tileEntity;}
 
+  updateCords(map:LevelMap){
+    this.posX = this.x * map.getTileSize();
+    this.posY = this.y * map.getTileSize();
+    this.centerX = this.posX+ map.getHalfTileSize();
+    this.centerY = this.posY+ map.getHalfTileSize();
+  }
+  getCenterX() {
+    return this.centerX;
+  }
+  getCenterY() {
+    return this.centerY;
+  }
 }

@@ -1,7 +1,6 @@
 
-// CONDITIONS
 
-import { LogicContext } from "../../manager/support/LogicProcess";
+import { LogicContext } from "../../manager/support/SharedContext";
 import { EntityState, TileEntity } from "../../TileEntity";
 
 export interface LogicCondition {

@@ -1,7 +1,5 @@
-import { Condition } from "selenium-webdriver";
 import { LogicService } from "src/app/services/logic.service";
-import { LogicContext } from "../manager/support/LogicProcess";
-import { BotInstance } from "./BotInstance";
+import { LogicContext } from "../manager/support/SharedContext";
 import { LogicBlock } from "./logic/LogicBlock";
 import { LogicCondition } from "./logic/LogicCondition";
 

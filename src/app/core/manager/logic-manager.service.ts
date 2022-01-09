@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
+import { PathfinderService } from 'src/app/core/map/pathfinder.service';
 import { LevelInstance } from './support/LevelInstance';
-import { LogicContext, LogicProcess } from './support/LogicProcess';
+import { LogicProcess } from './support/LogicProcess';
+import { LogicContext } from './support/SharedContext';
 
 
 /**
@@ -22,10 +24,11 @@ export class LogicManagerService {
    */
   private logicProcesses: LogicProcess[] = [];
 
-  constructor() { }
+  constructor(private pathfinderService:PathfinderService) { }
 
   public update(levelInstance:LevelInstance) {
     const logicContext = new LogicContext(levelInstance);
+    logicContext.setPathfinderService(this.pathfinderService);
     this.logicProcesses.forEach( logicProcess => {
       logicProcess.update(logicContext);
     });
