@@ -90,6 +90,8 @@ export class MapTile {
   public centerY:number;
   public tileEntity: TileEntity;
 
+  public cornerCords:{TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}};
+
   constructor(
     map:LevelMap,
     public x:number,
@@ -108,11 +110,16 @@ export class MapTile {
     this.posY = this.y * map.getTileSize();
     this.centerX = this.posX+ map.getHalfTileSize();
     this.centerY = this.posY+ map.getHalfTileSize();
+    this.cornerCords = {TL:{x:this.posX,y:this.posY}, TR:{x:this.posX+map.getTileSize(),y:this.posY},
+      BL:{x:this.posX,y:this.posY+map.getTileSize()}, BR:{x:this.posX+map.getTileSize(),y:this.posY+map.getTileSize()}};
   }
   getCenterX() {
     return this.centerX;
   }
   getCenterY() {
     return this.centerY;
+  }
+  getCornerCords(): {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}}{
+    return this.cornerCords;
   }
 }

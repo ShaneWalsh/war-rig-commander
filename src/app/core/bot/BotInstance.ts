@@ -65,12 +65,16 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
     drawingContext.clearBotInstance();
   }
 
-  // TODO come back to these calcualtions when using images etc
+  // TODO come back to these calcualtions when using images etc Does tile size matter?
   getCenterX():number {
     return this.posX+(16);
   }
   getCenterY():number {
-      return this.posY+(16);
+    return this.posY+(16);
+  }
+  // TODO how to factor in the tile size?
+  getTopLeftCords():{x:number,y:number} {
+    return {x:this.posX+(16), y:this.posY+(16)};
   }
 
   setGoal(botGoal:BotGoal) {
