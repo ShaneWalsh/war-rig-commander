@@ -57,9 +57,9 @@ export class PathfinderService {
       x = closed[closed.length-1].x;
       y = closed[closed.length-1].y;
 
-      if (x < originalMap.getTiles().length ) checkPosition(x+1,y);
+      if (x +1 < originalMap.getTiles().length ) checkPosition(x+1,y);
       if (x-1 > -1) checkPosition(x-1,y);
-      if (originalMap.getTiles()[x].length) checkPosition(x,y+1);
+      if (y+1 < originalMap.getTiles()[x].length) checkPosition(x,y+1);
       if (y-1 > -1) checkPosition(x,y-1);
 
       open.sort((a,b)=>a.h - b.h); // sort and repeat until the goal is found eh?

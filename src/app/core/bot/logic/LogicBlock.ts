@@ -28,7 +28,7 @@ export class PatrolLogic implements LogicBlock {
   }
 
   update(logicContext:LogicContext):boolean {
-    if(this.path == null){
+    if(this.path == null) { // TODO should this be a shared variable so others can reuse the same path?
       let path = [];
       let point0 = this.points[0];
       let pointA = point0;

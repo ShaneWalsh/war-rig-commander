@@ -8,6 +8,7 @@ import { UiSettings } from "./UiSettings";
 export class SharedContext {
   tileEntity:TileEntity = null;
   botInstance:BotInstance = null; // purely convience reference
+  private sharedVariables: Map<string,any> = new Map();
 
   setBotInstance(botInstance:BotInstance){
     this.tileEntity = botInstance;
@@ -20,7 +21,12 @@ export class SharedContext {
   getBotInstance():BotInstance {
     return this.botInstance;
   }
-
+  getLogicVariable(variable: string):any {
+    return this.sharedVariables.get(variable);
+  }
+  setLogicVariable(variable: string, val: any):any {
+    return this.sharedVariables.set(variable, val);
+  }
 }
 
 // can easily add more values are required for game logic.
