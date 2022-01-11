@@ -76,6 +76,9 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   getTopLeftCords():{x:number,y:number} {
     return {x:this.posX+(16), y:this.posY+(16)};
   }
+  getTileCords():{x:number,y:number} {
+    return {x:this.tileX, y:this.tileY};
+  }
 
   setGoal(botGoal:BotGoal) {
     this.botGoal = botGoal;

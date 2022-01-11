@@ -23,20 +23,24 @@ export class LogicManagerService {
    * Long lived processes that can run indefinitely
    */
   private logicProcesses: LogicProcess[] = [];
+  private logicContext;
 
   constructor(private pathfinderService:PathfinderService) { }
 
   public update(levelInstance:LevelInstance) {
-    const logicContext = new LogicContext(levelInstance);
-    logicContext.setPathfinderService(this.pathfinderService);
+    this.logicContext.setPathfinderService(this.pathfinderService);
     this.logicProcesses.forEach( logicProcess => {
-      logicProcess.update(logicContext);
+      logicProcess.update(this.logicContext);
     });
   }
 
   // #################
   // #### GET SET ####
   // #################
+
+  public createContextForLevel(levelInstance){
+    this.logicContext = new LogicContext(levelInstance);
+  }
 
   public setLogicProcesses(logicProcesses:LogicProcess[]){
     this.logicProcesses = logicProcesses;

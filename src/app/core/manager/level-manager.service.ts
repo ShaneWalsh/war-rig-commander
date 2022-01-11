@@ -107,8 +107,16 @@ class TestLevel extends LevelInstance {
 
     // create all of the buildings and units etc
       // patrolling unit
+    let patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     let bi = new BotInstance({},2,3,1,1,2*32,3*32);
-    bi.setGoal(LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]));
+    bi.setGoal(patrol);
+    bi.addPart(new DrawTestBotPart());
+    this.mc.displayManagerService.addDrawer(bi);
+    this.mc.logicManagerService.addLogicProcess(bi);
+
+    // patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
+    bi = new BotInstance({},2,33,1,1,2*32,33*32);
+    bi.setGoal(patrol);
     bi.addPart(new DrawTestBotPart());
     this.mc.displayManagerService.addDrawer(bi);
     this.mc.logicManagerService.addLogicProcess(bi);

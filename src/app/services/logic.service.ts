@@ -82,6 +82,10 @@ export class LogicService {
     //ctx.fill();
   }
 
+  public static posDiff(a,b):number {
+    return (a > b)? a - b:b - a;
+  }
+
   public static getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }

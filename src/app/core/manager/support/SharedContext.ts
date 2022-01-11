@@ -21,10 +21,10 @@ export class SharedContext {
   getBotInstance():BotInstance {
     return this.botInstance;
   }
-  getLogicVariable(variable: string):any {
+  getSharedVariable(variable: string):any {
     return this.sharedVariables.get(variable);
   }
-  setLogicVariable(variable: string, val: any):any {
+  setSharedVariable(variable: string, val: any):any {
     return this.sharedVariables.set(variable, val);
   }
 }
@@ -42,11 +42,18 @@ export class LogicContext extends SharedContext {
    * get logic variables related to the current entity
    * @param logicVarBlockIndex
    */
-  getLogicVariable(variable: string):any {
+  getLocalVariable(variable: string):any {
     return this.tileEntity.getLogicVariables().get(variable);
   }
-  setLogicVariable(variable: string, val: any):any {
+  // if the local variable doesnt exist return the default value.
+  getLocalVariableOrDefault(variable: string, defaultValue:any):any {
+    return (this.tileEntity.getLogicVariables().has(variable)) ? this.getLocalVariable(variable):defaultValue;
+  }
+  setLocalVariable(variable: string, val: any):any {
     return this.tileEntity.getLogicVariables().set(variable, val);
+  }
+  removeLocalVariable(variable: string):boolean {
+    return this.tileEntity.getLogicVariables().delete(variable);
   }
 
   getPathfinderService(): PathfinderService {

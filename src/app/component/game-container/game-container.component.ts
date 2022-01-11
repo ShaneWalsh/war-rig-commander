@@ -42,7 +42,8 @@ export class GameContainerComponent implements OnInit, OnDestroy {
       // ########################################### TEMPORARY TEST LOGIC ##########################################################################
       // ###########################################################################################################################################
 
-      this.levelManagerService.initLevel("TEST", this.managerContext)
+      this.levelManagerService.initLevel("TEST", this.managerContext);
+      this.logicManagerService.createContextForLevel(this.levelManagerService.getCurrentLevel());
 
       // ###########################################################################################################################################
       // ########################################### TEMPORARY TEST LOGIC ##########################################################################

@@ -47,17 +47,15 @@ export class LogicScenario {
    * Will be called before the scenario is used by an entity, can do any prep, clear variables.
    * @param logicContext
    */
-  prepScenario(logicContext:LogicContext){
-    if(this.clearSeqVariablesOnLoad) {
-      this.seq.prepSequence(logicContext);
-    }
+  loadScenario(logicContext:LogicContext){
+    this.seq.loadSequence(logicContext,this.clearSeqVariablesOnLoad);
   }
 
   checkScenario(logicContext:LogicContext):LogicScenario {
     for(let i = 0; i < this.possibleScenarios.length; i++) {
       const possibleScenario = this.possibleScenarios[i];
       if(possibleScenario.con.checkCondition(logicContext)){
-        possibleScenario.scen.prepScenario(logicContext);
+        possibleScenario.scen.loadScenario(logicContext);
         return possibleScenario.scen;
       }
     }
@@ -79,7 +77,7 @@ export class LogicSequence {
   }
 
   update(logicContext: LogicContext):boolean {
-    let logicVarBlockIndex = logicContext.getLogicVariable(this.logicVarBlockIndexId);
+    let logicVarBlockIndex = logicContext.getLocalVariable(this.logicVarBlockIndexId);
     if( logicVarBlockIndex === undefined || logicVarBlockIndex === null ) {
       logicVarBlockIndex = 0;
     }
@@ -95,16 +93,19 @@ export class LogicSequence {
     }
 
     // the logic index may have changed, so always set it again
-    logicContext.setLogicVariable(this.logicVarBlockIndexId, logicVarBlockIndex);
+    logicContext.setLocalVariable(this.logicVarBlockIndexId, logicVarBlockIndex);
     return false;
   }
 
-  prepSequence(logicContext: LogicContext) {
-    if(this.clearVariables){
+  loadSequence(logicContext: LogicContext, clearSequence:boolean) {
+    if(clearSequence || this.clearVariables) {
       // TODO loop on the map, find keys that start with logicSequenceId and remove them?
       // TODO pass the seqId down to the logicBlocks so they can set variables as well?
       // TODO set the seqID into the logicContext?
     }
+    this.logicBlocks.forEach(lb => {
+      lb.load(logicContext);
+    })
   }
 }
 
@@ -113,17 +114,26 @@ export interface BotGoal {
 }
 
 export class BotGoalSimple implements BotGoal {
+  goalId: string;
+  goalLoadedVarId: string;
 
   constructor (
     public currentGoal:LogicScenario,
     public defaultGoal:LogicScenario, // fallback to somekind of endless scenario if everything is complete, like a sentry mode.
     ) {
+    this.goalId = 'goal-'+ Date.now();
+    this.goalLoadedVarId = this.goalId+'-Loaded';
   }
 
   update(logicContext:LogicContext) {
+    if(!logicContext.getLocalVariableOrDefault(this.goalLoadedVarId,false)){
+      this.currentGoal.loadScenario(logicContext);
+      logicContext.setLocalVariable(this.goalLoadedVarId,true);
+    }
     this.currentGoal = this.currentGoal.checkScenario(logicContext);
     if(this.currentGoal.update(logicContext)){
       this.currentGoal = this.defaultGoal;
+      this.currentGoal.loadScenario(logicContext);
     }
   }
 
