@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BotGoal, BotGoalSimple, LogicScenario, LogicSequence } from '../bot/BotGoal';
-import { PatrolLogic } from '../bot/logic/LogicBlock';
-import { PathfinderService } from '../map/pathfinder.service';
+import { PatrolLogic } from '../bot/logic/movement/PatrolLogic';
 
 @Injectable({
   providedIn: 'root'
