@@ -18,6 +18,9 @@ export interface LogicBlock {
 
 }
 
+/**
+ * Attributes are local unless specified otherewise with shared in the name.
+ */
 export abstract class AbstractLogicBlock implements LogicBlock {
   protected logicId:string; // unique for each logic block.
   protected logicLoadedId:string; // unique for each logic block.

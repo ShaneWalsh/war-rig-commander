@@ -115,6 +115,15 @@ export class PathfinderService {
     return gridA;
   }
 
+  public static getHeadingDirection(current:{x,y},target:{x,y}):HeadingDirection {
+    if(target.x > current.x) {
+      return (target.y > current.y)? HeadingDirection.BR : (target.y < current.y)? HeadingDirection.TR : HeadingDirection.RIGHT;
+    } else if(target.x < current.x) {
+      return (target.y > current.y)? HeadingDirection.BL : (target.y < current.y)? HeadingDirection.TL : HeadingDirection.LEFT;
+    } else {
+      return (target.y > current.y)? HeadingDirection.BOTTOM : (target.y < current.y)? HeadingDirection.TOP : HeadingDirection.NA;
+    }
+  }
 }
 
 class MoveNode {
@@ -125,3 +134,18 @@ class MoveNode {
     public h // total value n + distance to end node
     ){ }
 }
+
+// TL, T, TR
+// L, NA, R
+// BL, B, BR
+export enum HeadingDirection {
+  TL="TL",
+  TOP="TOP",
+  TR="TR",
+  LEFT="LEFT",
+  NA="NA",
+  RIGHT="RIGHT",
+  BL="BL",
+  BOTTOM="BOTTOM",
+  BR="BR"
+ }

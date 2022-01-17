@@ -13,59 +13,76 @@ export class MoveToLogic extends AbstractLogicBlock {
     this.calcPath(logicContext);
   }
 
-  private currentPointVarId = this.logicId+'-currentPoint';
-  private turnDirectionVarId = this.logicId+'-turnDirection';
-  private pathLocalVarId = this.logicId+'-Path'; // the actual patrol path, in a loop.
+  protected currentPointVarId = this.logicId+'-currentPoint';
+  protected moveDirectionVarId = this.logicId+'-moveDirection';
+  protected headDirectionVarId = this.logicId+'-headDirection';
+  protected pathVarId = this.logicId+'-Path'; // the actual path
 
-  constructor(public points:{x,y}[]) {
-    super('MoveTo');
+  constructor(public points:{x,y}[], public loopPath=false, public LogicCode='MoveTo') {
+    super(LogicCode);
   }
 
   update(logicContext:LogicContext):boolean {
     // if the point has changed, change the turn direction.
-    let path = logicContext.getLocalVariable(this.pathLocalVarId);
+    let path = logicContext.getLocalVariable(this.pathVarId);
+    return this.updatePath(logicContext,path);
+  }
+
+  updatePath(logicContext:LogicContext, path): boolean {
     let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
     let nextPoint = path[currentPoint];
     const botInstance = logicContext.getBotInstance();
+
     if(botInstance.tileX == nextPoint.x && botInstance.tileY == nextPoint.y) {
       currentPoint = LogicService.incrementLoop(currentPoint, path.length);
-      if(currentPoint == 0) { // we are done, we have gone to the end of the path.
+      if(currentPoint == 0 && !this.loopPath) { // we are done, we have gone to the end of the path.
         return true;
       }
       nextPoint = path[currentPoint];
       logicContext.setLocalVariable(this.currentPointVarId,currentPoint);
-      logicContext.removeLocalVariable(this.turnDirectionVarId);
+      logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(botInstance.getTileCords(),nextPoint));
+      logicContext.removeLocalVariable(this.moveDirectionVarId);
     }
 
     const li = logicContext.levelInstance;
     let tile = li.getMap().get(nextPoint.x,nextPoint.y);
 
-    let turnDirection:TurretDirection = logicContext.getLocalVariable(this.turnDirectionVarId);
-    if(turnDirection == null) {
-      turnDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),tile.getCenterX(), tile.getCenterY(),4,true);
-      logicContext.setLocalVariable(this.turnDirectionVarId, turnDirection);
+    // TODO can I move into the target tile?
+      // Something may have changed since the path was chosen, perhaps, its now blocked.
+        // IF blocked, pathfind again? but not if its going to move out of my way?
+          // is it moving?
+            // is it heading away from me,
+              // then just wait for it to move away.
+            // towards me
+              // then I should move around it, if I can. or turn around,
+              // or just stop, 'say path is blocked here sir'.
+
+    let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
+    if(moveDirection == null) {
+      moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),tile.getCenterX(), tile.getCenterY(),4,true);
+      logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
     } else {
-      turnDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
+      moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
     }
 
-    //TODO am I facing the right way?
-      // if not then I have to turn
-    botInstance.posX += turnDirection.speed * turnDirection.directionX;
-    botInstance.posY += turnDirection.speed * turnDirection.directionY;
+    // TODO facing, the right way, then rotate before moving?
 
-    //TODO what tile am I in now? after moving? Need to update my tile(s)
-      // So we are going to follow the topleft tile. If his center point has moved into a new tile then so have the others.
-      // pointInRectangle
+    // Free to move, so move.
+    botInstance.posX += moveDirection.speed * moveDirection.directionX;
+    botInstance.posY += moveDirection.speed * moveDirection.directionY;
 
-    //TODO  can I determine which tiles I am moving to and set a State?
-      // on a change of direction, new waypoint, this should be set, can then be used in next calculations.
-      // TL, T, TR
-      // L, NA, R
-      // BL, B, BR
-
+    // TODO what tile am I in now? after moving? Need to update my tile(s)
     if(LogicService.isPointInRectangle(botInstance.getTopLeftCords(),tile.getCornerCords())){
       botInstance.tileX = tile.x
       botInstance.tileY = tile.y
+      // TODO update all tiles of the move?
+      // TODO check if its occupied by anything that I can crush, if so, crush it, IF!!! our hitboxes intersect.
+
+      // TODO  can I determine which tiles I am moving to and set a State?
+        // on a change of direction, new waypoint, this should be set, can then be used in next calculations.
+        // TL, T, TR
+        // L, NA, R
+        // BL, B, BR
     }
     return false;
   }
@@ -81,10 +98,13 @@ export class MoveToLogic extends AbstractLogicBlock {
       pointA = pointB;
     }
     if(pathCal != null){
-      logicContext.setLocalVariable(this.pathLocalVarId,pathCal);
+      logicContext.setLocalVariable(this.pathVarId,pathCal);
     } else {
       console.error('Path not possible');
     }
+    logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(bi.getTileCords(),pathCal[0]));
   }
-
 }
+
+
+
