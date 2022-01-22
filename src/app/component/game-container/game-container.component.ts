@@ -4,6 +4,7 @@ import { DisplayManagerService } from 'src/app/core/manager/display-manager.serv
 import { LevelManagerService } from 'src/app/core/manager/level-manager.service';
 import { LogicManagerService } from 'src/app/core/manager/logic-manager.service';
 import { ManagerContext } from 'src/app/core/manager/support/ManagerContext';
+import { KeyboardEventService } from 'src/app/services/keyboard-event.service';
 import { MouseService } from 'src/app/services/mouse.service';
 
 @Component({
@@ -30,13 +31,13 @@ export class GameContainerComponent implements OnInit, OnDestroy {
 
     @Input() public requestAnimFrame: any;
 
-    constructor(private levelManagerService:LevelManagerService, private logicManagerService:LogicManagerService, private displayManagerService:DisplayManagerService) {
+    constructor(private levelManagerService:LevelManagerService, private logicManagerService:LogicManagerService, private displayManagerService:DisplayManagerService, private keyboardEventService:KeyboardEventService) {
       this.subs.push(this.levelManagerService.getGameTickSubject().subscribe(result => {
         if(this.tickComplete){
             this.update();
         }
       }));
-      this.managerContext = new ManagerContext(levelManagerService,logicManagerService,displayManagerService);
+      this.managerContext = new ManagerContext(levelManagerService,logicManagerService,displayManagerService,keyboardEventService);
 
       // ###########################################################################################################################################
       // ########################################### TEMPORARY TEST LOGIC ##########################################################################

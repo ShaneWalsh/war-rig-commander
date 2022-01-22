@@ -1,11 +1,10 @@
 import { ElementRef, Injectable } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { UiSettings } from 'src/app/core/manager/support/display/UiSettings';
+import { KeyboardEventService } from 'src/app/services/keyboard-event.service';
 import { MouseService } from 'src/app/services/mouse.service';
 import { ResizeService } from 'src/app/services/resize.service';
-import { UiSettings } from 'src/app/core/manager/support/display/UiSettings';
 import { CanvasContainer } from './support/display/CanvasContainer';
 import { Drawer } from './support/display/Drawer';
-import { KeyboardEventService } from 'src/app/services/keyboard-event.service';
 import { DrawingContext } from './support/SharedContext';
 
 /**
@@ -62,6 +61,10 @@ export class DisplayManagerService {
 
   public setDrawers(drawers:Drawer[]){
     this.drawers = drawers;
+  }
+
+  public getUiSettings():UiSettings{
+    return this._uiSettings;
   }
 
   public addDrawer(drawer:Drawer) {

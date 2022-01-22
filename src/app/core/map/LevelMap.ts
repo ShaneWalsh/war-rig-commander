@@ -2,6 +2,7 @@ import { LogicService } from "src/app/services/logic.service";
 import { Drawer } from "../manager/support/display/Drawer";
 import { LogicProcess } from "../manager/support/logic/LogicProcess";
 import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
+import { Opt } from "../Opt";
 import { TileEntity } from "../TileEntity";
 
 export class LevelMap implements Drawer, LogicProcess {
@@ -30,6 +31,8 @@ export class LevelMap implements Drawer, LogicProcess {
     }
   }
 
+  init(logicContext: LogicContext) {}
+  destroy(logicContext: LogicContext) {}
   update(logicContext: LogicContext) {
     // not sure it needs to do anything?
   }
@@ -58,7 +61,6 @@ export class LevelMap implements Drawer, LogicProcess {
       }
       y = 0;
     }
-
   }
 
   get(x: number, y: number):MapTile {
@@ -84,7 +86,7 @@ export class MapTile {
   public posY:number;
   public centerX:number;
   public centerY:number;
-  public tileEntity: TileEntity;
+  public tileEntity: TileEntity = null;
 
   public cornerCords:{TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}};
 
@@ -98,6 +100,9 @@ export class MapTile {
   }
 
   // GETTER SETTER
+  optTileEntity(){
+    return new Opt(this.tileEntity);
+  }
   removeTileEntity(){this.tileEntity = null;}
   setTileEntity(tileEntity: TileEntity){this.tileEntity = tileEntity;}
 
@@ -114,6 +119,9 @@ export class MapTile {
   }
   getCenterY() {
     return this.centerY;
+  }
+  getCords(): {x:number,y:number}{
+    return {x:this.x,y:this.y}
   }
   getCornerCords(): {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}}{
     return this.cornerCords;

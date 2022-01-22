@@ -59,7 +59,7 @@ export class MoveToLogic extends AbstractLogicBlock {
 
     let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
     if(moveDirection == null) {
-      moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),4,true);
+      moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
       logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
     } else {
       moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
@@ -72,7 +72,7 @@ export class MoveToLogic extends AbstractLogicBlock {
     botInstance.posY += moveDirection.speed * moveDirection.directionY;
 
     // TODO what tile am I in now? after moving? Need to update my tile(s)
-    if(LogicService.isPointInRectangle(botInstance.getTopLeftCords(),nextTile.getCornerCords())){
+    if(LogicService.isPointInRectangle(botInstance.getTopLeftTileCenterCords(),nextTile.getCornerCords())){
       let currentTile = li.getMap().get(botInstance.tileX,botInstance.tileY);
       // TODO handle the existing entity in the tile of there is one, what happens to it? Right now its just vanishing.
       currentTile.removeTileEntity();

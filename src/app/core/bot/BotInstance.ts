@@ -27,20 +27,21 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
 
   constructor(
       public config:any={}, // override defaults
-      public tileX:number, // which tile the bot is on (the top left one anyway)
-      public tileY:number,
-      public tileSizeX:number, // how many tiles the bot occupies in the x direction
-      public tileSizeY:number,
+      tileX:number, // which tile the bot is on (the top left one anyway)
+      tileY:number,
+      tileSizeX:number, // how many tiles the bot occupies in the x direction
+      tileSizeY:number,
       // some kind of drawing object
       public posX:number = tileX, // the actual current x+y cords of the bot
       public posY:number = tileY,
       // alignment? faction? player controlled?
       // group, e.g if you fire on one bot in a convoy, they will all know, and react.
     ) {
-      super();
+      super(tileX,tileY,tileSizeX,tileSizeY);
       this.tryConfigValues(["bTimer"]);
   }
-
+  init(logicContext: LogicContext) {}
+  destroy(logicContext: LogicContext) {}
 
   update(logicContext: LogicContext) {
     logicContext.setBotInstance(this);
@@ -73,11 +74,8 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
     return this.posY+(16);
   }
   // TODO how to factor in the tile size?
-  getTopLeftCords():{x:number,y:number} {
+  getTopLeftTileCenterCords():{x:number,y:number} {
     return {x:this.posX+(16), y:this.posY+(16)};
-  }
-  getTileCords():{x:number,y:number} {
-    return {x:this.tileX, y:this.tileY};
   }
 
   setGoal(botGoal:BotGoal) {

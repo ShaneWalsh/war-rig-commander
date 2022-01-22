@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MouseService } from 'src/app/services/mouse.service';
-import { KeyboardEventService } from '../../services/keyboard-event.service';
+import { CustomKeyboardEvent, KeyboardEventService } from '../../services/keyboard-event.service';
 import { BotGoalSimple } from '../bot/BotGoal';
 import { BotInstance } from '../bot/BotInstance';
 import { DrawTestBotPart } from '../bot/BotPart';
@@ -10,6 +10,7 @@ import { LevelMap } from '../map/LevelMap';
 import { Drawer } from './support/display/Drawer';
 import { LevelInstance } from './support/level/LevelInstance';
 import { LogicProcess } from './support/logic/LogicProcess';
+import { UiLogic } from './support/logic/UiLogic';
 import { ManagerContext } from './support/ManagerContext';
 import { DrawingContext, LogicContext } from './support/SharedContext';
 
@@ -27,18 +28,29 @@ export class LevelManagerService {
 
   constructor(private keyboardEventService: KeyboardEventService) {
     keyboardEventService.getKeyDownEventSubject().subscribe(customKeyboardEvent => {
-      if (this.getNotPaused()){
-          //this.currentLevel.processKeyDown(customKeyboardEvent);
+      if (this.getNotPaused()) {
+          this.currentLevel.processKeyDown(customKeyboardEvent);
       }
     });
     keyboardEventService.getKeyUpEventSubject().subscribe(customKeyboardEvent => {
-      if (this.getNotPaused()){
-        //this.currentLevel.processKeyUp(customKeyboardEvent);
+      if (this.getNotPaused()) {
+        this.currentLevel.processKeyUp(customKeyboardEvent);
       }
     });
     MouseService.leftClickSubject$.subscribe(leftClick => {
-      if (this.getNotPaused()){
-        //this.currentLevel.leftClick(leftClick);
+      if (this.getNotPaused()) {
+        console.log(leftClick);
+        this.currentLevel.leftClick(leftClick);
+      }
+    });
+    MouseService.leftClickReleaseSubject$.subscribe(leftRelease => {
+      if (this.getNotPaused()) {
+        this.currentLevel.leftClickRelease(leftRelease);
+      }
+    });
+    MouseService.rightClickReleaseSubject$.subscribe(rightRelease => {
+      if (this.getNotPaused()) {
+        this.currentLevel.rightClickRelease(rightRelease);
       }
     });
   }
@@ -95,6 +107,7 @@ export class LevelManagerService {
 // ###########################################################################################################################################
 
 class TestLevel extends LevelInstance {
+
   map: LevelMap;
   uiLogic: UiLogic; // TODO it should subscribe to all of the events itself and not be passed them through a 3rd party. Put Mouse service in MC
 
@@ -104,77 +117,50 @@ class TestLevel extends LevelInstance {
 
   public initLevel() {
     // level context, which in this case is
-      // 2d map tiles
-      // bots/units
-        // units should have a faction
-        // targeting should use a priority
-      // buildings
+    // 2d map tiles
+    // bots/units
+    // units should have a faction
+    // targeting should use a priority
+    // buildings
 
     // create the map, add logic and drawing processes.
     this.map = new LevelMap();
-    this.mc.displayManagerService.addDrawer(this.map);
-    this.mc.logicManagerService.addLogicProcess(this.map);
+    this.mc.displayMS.addDrawer(this.map);
+    this.mc.logicMS.addLogicProcess(this.map);
 
     // create all of the buildings and units etc
-      // patrolling unit
+    // patrolling unit
     let patrol = LogicFactoryService.createPatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     let bi = new BotInstance({},2,3,1,1,2*32,3*32);
     bi.setGoal(patrol);
     bi.addPart(new DrawTestBotPart());
-  // this.mc.displayManagerService.addDrawer(bi);
-    this.mc.logicManagerService.addLogicProcess(bi);
+    this.mc.logicMS.addLogicProcess(bi);
 
     // patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     bi = new BotInstance({},2,33,1,1,2*32,33*32);
     bi.setGoal(patrol);
     bi.addPart(new DrawTestBotPart());
-   // this.mc.displayManagerService.addDrawer(bi);
-    this.mc.logicManagerService.addLogicProcess(bi);
+    this.mc.logicMS.addLogicProcess(bi);
 
     let moveTo = LogicFactoryService.createMoveTo([{x:39,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     bi = new BotInstance({},5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);
     bi.addPart(new DrawTestBotPart());
-   // this.mc.displayManagerService.addDrawer(bi);
-    this.mc.logicManagerService.addLogicProcess(bi);
+    this.mc.logicMS.addLogicProcess(bi);
 
     // create the resources tracker
 
     // create the gui
-
+    this.uiLogic = new UiLogic(this.mc);
+    this.mc.displayMS.addDrawer(this.uiLogic);
     // all done
-    this.mc.levelManagerService.getLevelLoadedSubject().next(this);
+    this.mc.levelMS.getLevelLoadedSubject().next(this);
   }
 
   public getMap(): LevelMap {
     return this.map;
   }
-}
-
-// TODO Should have access to mouse and keyboard values
-// it may not need to be a logic process.
-class UiLogic implements Drawer, LogicProcess {
-
-  //TODO highlight anything we are hovering over? Toggleable
-
-  // states/workflows
-    // click on a unit, on next click we will be give it an order, unless shift is also pressed and you are selecting
-  // Selection, hold left mouse button, draw a selection box
-    // release, go through all tiles and add entities to selected
-      // Now state would be selected, so it would be ready to issue commands
-        // move
-        // patrol
-        // guard
-        // attack
-        // left click again, deselect
-        // left click + shift again, add selectection
-
-  update(logicContext: LogicContext) {
-    throw new Error('Method not implemented.');
+  public getUiLogic(): UiLogic {
+    return this.uiLogic;
   }
-
-  draw(drawingContext: DrawingContext) {
-    throw new Error('Method not implemented.');
-  }
-
 }

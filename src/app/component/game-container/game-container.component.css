@@ -1,5 +1,7 @@
 .canvas-position {
   position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 .game-container-center {

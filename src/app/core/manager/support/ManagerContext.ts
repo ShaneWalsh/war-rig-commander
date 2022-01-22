@@ -1,3 +1,4 @@
+import { KeyboardEventService } from "src/app/services/keyboard-event.service";
 import { DisplayManagerService } from "../display-manager.service";
 import { LevelManagerService } from "../level-manager.service";
 import { LogicManagerService } from "../logic-manager.service";
@@ -7,7 +8,7 @@ import { LogicManagerService } from "../logic-manager.service";
  */
 export class ManagerContext {
 
-  constructor(public levelManagerService:LevelManagerService, public logicManagerService:LogicManagerService, public displayManagerService:DisplayManagerService){
+  constructor(public levelMS:LevelManagerService, public logicMS:LogicManagerService, public displayMS:DisplayManagerService, public keyboardEventService:KeyboardEventService){
 
   }
 

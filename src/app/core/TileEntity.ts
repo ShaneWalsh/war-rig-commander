@@ -32,16 +32,33 @@ export enum EntityState {
   getState(entityState:EntityState):boolean;
   getStates():Map<EntityState,boolean>;
   getLogicVariables():Map<string,any>;
+  getTileCords():{x:number,y:number};
+  getTileSizes():{tileSizeX:number,tileSizeY:number};
 }
 
 export abstract class AbsTileEntity implements TileEntity {
   private states:Map<EntityState,boolean> = new Map();
   private logicVariables:Map<string,any> = new Map();
 
+  constructor(
+    public tileX:number, // which tile the bot is on (the top left one anyway)
+    public tileY:number,
+    public tileSizeX:number, // how many tiles the bot occupies in the x direction
+    public tileSizeY:number,
+  ){
+
+  }
+
   isPassable(): boolean {
     return false;
   }
 
+  getTileCords():{x:number,y:number} {
+    return {x:this.tileX, y:this.tileY};
+  }
+  getTileSizes():{tileSizeX:number,tileSizeY:number} {
+    return {tileSizeX:this.tileSizeX, tileSizeY:this.tileSizeY};
+  }
   /** Filps the current value of a state or sets it to true if its never been set */
   toggleState(entityState: EntityState) {
     if(this.states.has(entityState)) {
