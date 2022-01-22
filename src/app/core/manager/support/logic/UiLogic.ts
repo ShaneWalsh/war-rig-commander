@@ -129,10 +129,9 @@ class BotEntitySelectedUiState extends UiLogicState {
   }
   draw(dc: DrawingContext) {
     const uiSet = dc.uiSet;
-    const eCords = this._botInstance.getTileCords();
+    const eCords = this._botInstance.getUiCords(uiSet);
     LogicService.drawBorder(
-      ((eCords.x*uiSet.tileSize)-uiSet.curX),
-      ((eCords.y*uiSet.tileSize)-uiSet.curY),
+      eCords.x, eCords.y,
       uiSet.tileSize,
       uiSet.tileSize,
       dc.cc.topCtx,"#FF0000");
@@ -158,10 +157,9 @@ class BotEntitySelectedUiState extends UiLogicState {
 
   draw(dc: DrawingContext) {
     const uiSet = dc.uiSet;
-    const tCords = this._mapTile;
+    const tCords = this._mapTile.getUiCords(uiSet);
     LogicService.drawBorder(
-      ((tCords.x*uiSet.tileSize)-uiSet.curX),
-      ((tCords.y*uiSet.tileSize)-uiSet.curY),
+      tCords.x, tCords.y,
       uiSet.tileSize,
       uiSet.tileSize,
       dc.cc.bgCtx,"#FF0000");

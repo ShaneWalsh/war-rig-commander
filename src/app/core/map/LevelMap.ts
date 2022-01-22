@@ -1,5 +1,6 @@
 import { LogicService } from "src/app/services/logic.service";
 import { Drawer } from "../manager/support/display/Drawer";
+import { UiSettings } from "../manager/support/display/UiSettings";
 import { LogicProcess } from "../manager/support/logic/LogicProcess";
 import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
 import { Opt } from "../Opt";
@@ -125,6 +126,14 @@ export class MapTile {
   }
   getCornerCords(): {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}}{
     return this.cornerCords;
+  }
+  /**
+   * The top left position of the first and main tile. Adjusted for ui offset movement.
+   * Could be used for accurate drawing.
+   */
+  getUiCords(uiSet:UiSettings): {x:number,y:number}{
+    return { x:((this.x*uiSet.tileSize)-uiSet.curX),
+            y:((this.y*uiSet.tileSize)-uiSet.curY)}
   }
 
   draw(dc: DrawingContext,x,y) {

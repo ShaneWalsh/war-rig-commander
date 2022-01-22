@@ -1,4 +1,5 @@
 import { Drawer } from "./manager/support/display/Drawer";
+import { UiSettings } from "./manager/support/display/UiSettings";
 import { DrawingContext } from "./manager/support/SharedContext";
 
 export enum EntityState {
@@ -58,6 +59,14 @@ export abstract class AbsTileEntity implements TileEntity {
   }
   getTileSizes():{tileSizeX:number,tileSizeY:number} {
     return {tileSizeX:this.tileSizeX, tileSizeY:this.tileSizeY};
+  }
+  /**
+   * The top left position of the first and main tile. Adjusted for ui offset movement.
+   * Could be used for accurate drawing.
+   */
+  getUiCords(uiSet:UiSettings): {x:number,y:number}{
+    return { x:((this.tileX*uiSet.tileSize)-uiSet.curX),
+            y:((this.tileY*uiSet.tileSize)-uiSet.curY)}
   }
   /** Filps the current value of a state or sets it to true if its never been set */
   toggleState(entityState: EntityState) {
