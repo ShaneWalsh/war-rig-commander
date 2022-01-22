@@ -2,9 +2,9 @@ import { ElementRef, Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MouseService } from 'src/app/services/mouse.service';
 import { ResizeService } from 'src/app/services/resize.service';
-import { UiSettings } from 'src/app/core/manager/support/UiSettings';
-import { CanvasContainer } from './support/CanvasContainer';
-import { Drawer } from './support/Drawer';
+import { UiSettings } from 'src/app/core/manager/support/display/UiSettings';
+import { CanvasContainer } from './support/display/CanvasContainer';
+import { Drawer } from './support/display/Drawer';
 import { KeyboardEventService } from 'src/app/services/keyboard-event.service';
 import { DrawingContext } from './support/SharedContext';
 

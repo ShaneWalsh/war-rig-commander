@@ -1,9 +1,9 @@
 import { BotInstance } from "../../bot/BotInstance";
 import { PathfinderService } from "../../map/pathfinder.service";
 import { TileEntity } from "../../TileEntity";
-import { CanvasContainer } from "./CanvasContainer";
-import { LevelInstance } from "./LevelInstance";
-import { UiSettings } from "./UiSettings";
+import { CanvasContainer } from "./display/CanvasContainer";
+import { LevelInstance } from "./level/LevelInstance";
+import { UiSettings } from "./display/UiSettings";
 
 export class SharedContext {
   tileEntity:TileEntity = null;
@@ -68,7 +68,7 @@ export class LogicContext extends SharedContext {
 // can easily add more values are required for drawing.
 export class DrawingContext extends SharedContext {
 
-  constructor(public cc:CanvasContainer, public uis:UiSettings) {
+  constructor(public cc:CanvasContainer, public uiSet:UiSettings) {
     super()
   }
 

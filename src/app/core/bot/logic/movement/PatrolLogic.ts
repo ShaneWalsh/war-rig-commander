@@ -60,14 +60,16 @@ export class PatrolLogic extends MoveToLogic {
    */
   getToFirstPoint(logicContext: LogicContext) {
     let path = this.getPath(logicContext);
-    let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
-    let nextPoint = path[currentPoint];
-    const bi = logicContext.getBotInstance();
-    // if we are too far away we need to move up to point 0 before continuing
-    if( LogicService.posDiff(bi.tileX,nextPoint.x) > 1 || LogicService.posDiff(bi.tileY,nextPoint.y) > 1 ) {
-      let mtl = new MoveToLogic([nextPoint]);
-      mtl.load(logicContext);
-      logicContext.setLocalVariable(this.pathToPatrolVarId,mtl);
+    if(path != null) {
+      let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
+      let nextPoint = path[currentPoint];
+      const bi = logicContext.getBotInstance();
+      // if we are too far away we need to move up to point 0 before continuing
+      if( LogicService.posDiff(bi.tileX,nextPoint.x) > 1 || LogicService.posDiff(bi.tileY,nextPoint.y) > 1 ) {
+        let mtl = new MoveToLogic([nextPoint]);
+        mtl.load(logicContext);
+        logicContext.setLocalVariable(this.pathToPatrolVarId,mtl);
+      }
     }
   }
 

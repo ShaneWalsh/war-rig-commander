@@ -8,9 +8,13 @@ export interface BotPart {
 
 export class DrawTestBotPart implements BotPart {
 
-  draw(drawingContext: DrawingContext) {
-    const bi = drawingContext.getBotInstance();
-    LogicService.drawBox(bi.posX, bi.posY,32,32,drawingContext.cc.groundCtx,'#FFFFFF','#FF00FF')
+  draw(dc: DrawingContext) {
+    const bi = dc.getBotInstance();
+    const uiSet = dc.uiSet;
+    LogicService.drawBox( bi.posX-uiSet.curX,
+                          bi.posY-uiSet.curY,
+                          32,32,dc.cc.groundCtx,
+                          '#FFFFFF','#FF00FF')
   }
 
 }

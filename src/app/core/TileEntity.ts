@@ -1,3 +1,5 @@
+import { Drawer } from "./manager/support/display/Drawer";
+import { DrawingContext } from "./manager/support/SharedContext";
 
 export enum EntityState {
   // Sensors
@@ -23,7 +25,7 @@ export enum EntityState {
 /**
  * Anything than exists on a tile and is not just background. Unit, building etc
  */
- export interface TileEntity {
+ export interface TileEntity extends Drawer {
   isPassable():boolean;
   toggleState(entityState:EntityState);
   setState(entityState: EntityState, bool:boolean);
@@ -32,7 +34,7 @@ export enum EntityState {
   getLogicVariables():Map<string,any>;
 }
 
-export class AbsTileEntity implements TileEntity {
+export abstract class AbsTileEntity implements TileEntity {
   private states:Map<EntityState,boolean> = new Map();
   private logicVariables:Map<string,any> = new Map();
 
@@ -63,4 +65,6 @@ export class AbsTileEntity implements TileEntity {
   getLogicVariables(): Map<string, any> {
     return this.logicVariables;
   }
+
+  abstract draw(drawingContext: DrawingContext);
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PathfinderService } from 'src/app/core/map/pathfinder.service';
-import { LevelInstance } from './support/LevelInstance';
-import { LogicProcess } from './support/LogicProcess';
+import { LevelInstance } from './support/level/LevelInstance';
+import { LogicProcess } from './support/logic/LogicProcess';
 import { LogicContext } from './support/SharedContext';
 
 

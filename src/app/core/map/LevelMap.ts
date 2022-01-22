@@ -1,6 +1,6 @@
 import { LogicService } from "src/app/services/logic.service";
-import { Drawer } from "../manager/support/Drawer";
-import { LogicProcess } from "../manager/support/LogicProcess";
+import { Drawer } from "../manager/support/display/Drawer";
+import { LogicProcess } from "../manager/support/logic/LogicProcess";
 import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
 import { TileEntity } from "../TileEntity";
 
@@ -44,20 +44,16 @@ export class LevelMap implements Drawer, LogicProcess {
     //       dc.cc.bgCtx,this.map[i][j],"#FFEEDD");
     //   }
     // }
-    const uiSet = dc.uis;
+    const uiSet = dc.uiSet;
 
 
     let x = 0;
     let y = 0;
     for(let viewX = uiSet.viewTilesStartPosX; viewX < this.size && viewX < uiSet.viewTilesEndPosX; viewX++,x++){
       for(let viewY = uiSet.viewTilesStartPosY; viewY < this.size && viewY < uiSet.viewTilesEndPosY; viewY++,y++){
-        if(viewX >= 0 && viewY >= 0){
-          LogicService.drawBox(
-            (x*uiSet.tileSize)-uiSet.viewXOffset,
-            (y*uiSet.tileSize)-uiSet.viewYOffset,
-            uiSet.tileSize,
-            uiSet.tileSize,
-            dc.cc.bgCtx,this.map[viewX][viewY].color,"#FFEEDD");
+        if(viewX >= 0 && viewY >= 0) {
+          const tile = this.get(viewX,viewY);
+          tile.draw(dc,x,y);
         }
       }
       y = 0;
@@ -122,4 +118,16 @@ export class MapTile {
   getCornerCords(): {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}}{
     return this.cornerCords;
   }
+
+  draw(dc: DrawingContext,x,y) {
+    const uiSet = dc.uiSet;
+    LogicService.drawBox(
+      (x*uiSet.tileSize)-uiSet.viewXOffset,
+      (y*uiSet.tileSize)-uiSet.viewYOffset,
+      uiSet.tileSize,
+      uiSet.tileSize,
+      dc.cc.bgCtx,this.color,"#FFEEDD");
+    this.tileEntity?.draw(dc);
+  }
+
 }

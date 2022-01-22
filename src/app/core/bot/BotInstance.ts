@@ -1,5 +1,5 @@
-import { Drawer } from "../manager/support/Drawer";
-import { LogicProcess } from "../manager/support/LogicProcess";
+import { Drawer } from "../manager/support/display/Drawer";
+import { LogicProcess } from "../manager/support/logic/LogicProcess";
 import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
 import { AbsTileEntity, TileEntity } from "../TileEntity";
 import { BotBrain } from "./BotBrains";

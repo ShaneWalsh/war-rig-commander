@@ -45,7 +45,7 @@ export class MoveToLogic extends AbstractLogicBlock {
     }
 
     const li = logicContext.levelInstance;
-    let tile = li.getMap().get(nextPoint.x,nextPoint.y);
+    let nextTile = li.getMap().get(nextPoint.x,nextPoint.y);
 
     // TODO can I move into the target tile?
       // Something may have changed since the path was chosen, perhaps, its now blocked.
@@ -59,7 +59,7 @@ export class MoveToLogic extends AbstractLogicBlock {
 
     let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
     if(moveDirection == null) {
-      moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),tile.getCenterX(), tile.getCenterY(),4,true);
+      moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),4,true);
       logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
     } else {
       moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
@@ -72,10 +72,14 @@ export class MoveToLogic extends AbstractLogicBlock {
     botInstance.posY += moveDirection.speed * moveDirection.directionY;
 
     // TODO what tile am I in now? after moving? Need to update my tile(s)
-    if(LogicService.isPointInRectangle(botInstance.getTopLeftCords(),tile.getCornerCords())){
-      botInstance.tileX = tile.x
-      botInstance.tileY = tile.y
-      // TODO update all tiles of the move?
+    if(LogicService.isPointInRectangle(botInstance.getTopLeftCords(),nextTile.getCornerCords())){
+      let currentTile = li.getMap().get(botInstance.tileX,botInstance.tileY);
+      // TODO handle the existing entity in the tile of there is one, what happens to it? Right now its just vanishing.
+      currentTile.removeTileEntity();
+      nextTile.setTileEntity(botInstance);
+      botInstance.tileX = nextTile.x
+      botInstance.tileY = nextTile.y
+      // TODO update all tiles of the move, Some bots can be bigger than one tile?
       // TODO check if its occupied by anything that I can crush, if so, crush it, IF!!! our hitboxes intersect.
 
       // TODO  can I determine which tiles I am moving to and set a State?
@@ -94,15 +98,22 @@ export class MoveToLogic extends AbstractLogicBlock {
     let pointA = point0;
     for(let i = 0; i < this.points.length; i++) {
       let pointB = this.points[i];
-      pathCal = pathCal.concat(PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,logicContext.levelInstance.getMap()));
-      pointA = pointB;
+      const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,logicContext.levelInstance.getMap());
+      // TODO decision here, should we drop the path entirely or see if we can still reach the other points?
+      if(path != null) { // Dropping for now, perhaps we skip this point because its unreacable?
+        pathCal = pathCal.concat(path);
+        pointA = pointB;
+      } else {
+        console.error('Path not possible, dropping');
+        return;
+      }
     }
-    if(pathCal != null){
+    if(pathCal != null && pathCal.length > 0 && pathCal[0] != null){
       logicContext.setLocalVariable(this.pathVarId,pathCal);
+      logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(bi.getTileCords(),pathCal[0]));
     } else {
       console.error('Path not possible');
     }
-    logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(bi.getTileCords(),pathCal[0]));
   }
 }
 

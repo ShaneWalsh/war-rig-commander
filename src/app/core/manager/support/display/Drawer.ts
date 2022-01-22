@@ -1,4 +1,4 @@
-import { DrawingContext } from "./SharedContext";
+import { DrawingContext } from "../SharedContext";
 
 
 // Default class for drawing something to the screen.

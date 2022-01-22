@@ -1,4 +1,4 @@
-import { LogicContext } from "./SharedContext";
+import { LogicContext } from "../SharedContext";
 
 // Default class for executing some game logic.
 export interface LogicProcess {
