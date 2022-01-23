@@ -6,6 +6,7 @@ import { MapTile } from "src/app/core/map/LevelMap";
 import { TileEntity } from "src/app/core/TileEntity";
 import { CustomKeyboardEvent } from "src/app/services/keyboard-event.service";
 import { LogicService } from "src/app/services/logic.service";
+import { MouseCords, MouseService } from "src/app/services/mouse.service";
 import { Drawer } from "../display/Drawer";
 import { ManagerContext } from "../ManagerContext";
 import { DrawingContext, LogicContext } from "../SharedContext";
@@ -99,10 +100,10 @@ class FreeUiState extends UiLogicState {
     if(optEnt.isPresent()) { // selected a specific entity
       const ent = optEnt.get();
       if(ent instanceof BotInstance)
-        return new BotEntitySelectedUiState(this.mc,ent);
+        return new BotEntitySelectedUiState(this.mc,[ent]);
       return new FreeUiState(this.mc);
     } else { // start dragging
-      return new DragSelectingUiState(this.mc,mapTile)
+      return new DragSelectingUiState(this.mc,mapTile);
     }
   }
 }
@@ -110,11 +111,11 @@ class FreeUiState extends UiLogicState {
 /**
  * Nothing selected, ready to wait for a click
  */
-class BotEntitySelectedUiState extends UiLogicState {
+class BotEntitySelectedUiState extends FreeUiState {
 
-  private _botInstance:BotInstance;
+  private _botInstance:BotInstance[];
 
-  constructor(mc:ManagerContext, _botInstance:BotInstance){
+  constructor(mc:ManagerContext, _botInstance:BotInstance[]){
     super(mc);
     this._botInstance = _botInstance;
   }
@@ -123,19 +124,20 @@ class BotEntitySelectedUiState extends UiLogicState {
     // make the entity move to the point?
     const mapTile = this.mc.levelMS.getCurrentLevel().getMouseMapTile(rightRelease);
     let moveTo = LogicFactoryService.createMoveTo([mapTile.getCords()]);
-    this._botInstance.setGoal(moveTo);
+    this._botInstance.forEach(b => b.setGoal(moveTo));
     // hold down shift to start waypointing?
-    return new FreeUiState(this.mc);
+    return this;
   }
   draw(dc: DrawingContext) {
     const uiSet = dc.uiSet;
-    const eCords = this._botInstance.getUiCords(uiSet);
+    this._botInstance.forEach(binstance => {
+    const eCords = binstance.getUiCords(uiSet);
     LogicService.drawBorder(
       eCords.x, eCords.y,
       uiSet.tileSize,
       uiSet.tileSize,
       dc.cc.topCtx,"#FF0000");
-
+    });
   }
 }
 
@@ -151,18 +153,39 @@ class BotEntitySelectedUiState extends UiLogicState {
     this._mapTile = mapTile;
   }
   leftClickRelease(leftRelease: MouseEvent): UiLogicState {
-    // todo select all of the entities in all of the tiles between the clicks
+    let bots = [];
+    const li = this.mc.levelMS.getCurrentLevel();
+    const endMapTile = li.getMouseMapTile(leftRelease);
+    const dragRect = LogicService.getRectCords(this._mapTile.x, this._mapTile.y,endMapTile.x,endMapTile.y);
+    for(let i = dragRect.x; i< dragRect.x2; i++) {
+      for(let j = dragRect.y; j< dragRect.y2; j++) {
+        const currentTile = li.getMap().get(i,j);
+        const optEnt = currentTile.optTileEntity();
+        if(optEnt.isPresent()) { // selected a specific entity
+          const ent = optEnt.get();
+          if(ent instanceof BotInstance)
+            bots.push(ent);
+        }
+      }
+    }
+    if(bots.length > 0){
+      return new BotEntitySelectedUiState(this.mc,bots);
+    }
     return new FreeUiState(this.mc);
   }
 
   draw(dc: DrawingContext) {
     const uiSet = dc.uiSet;
+    let mouseCords:MouseCords = MouseService.getMouseCords();
     const tCords = this._mapTile.getUiCords(uiSet);
-    LogicService.drawBorder(
-      tCords.x, tCords.y,
-      uiSet.tileSize,
-      uiSet.tileSize,
-      dc.cc.bgCtx,"#FF0000");
 
+    let cords = LogicService.getRectCords( tCords.x, tCords.y,
+      mouseCords.mouseX,
+      mouseCords.mouseY);
+
+    LogicService.drawBorder(
+      cords.x,cords.y,
+      cords.sx, cords.sy,
+      dc.cc.bgCtx,"#FF0000");
   }
 }

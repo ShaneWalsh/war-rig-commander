@@ -150,6 +150,33 @@ export class LogicService {
   }
 
   /**
+   * Taking in two points return a rect between the two points no mater where they are in relation to each other
+   * E.g click - draging and drawing a box in between.
+   * x: The top left x
+   * y: The top left y
+   * sx: distance from x+x2 sx
+   * sy: distance from y+y2 sy
+   * x2: The bottom right x2
+   * y2: The bottom right y2
+   * @returns
+   */
+  public static getRectCords(p1x,p1y,p2x,p2y):{x:number,y:number,sx:number,sy:number,x2:number,y2:number}{
+    if(p1x > p2x){
+      if(p1y > p2y){ // p1 is bottom right
+        return {x:p2x, y:p2y, sx:p1x-p2x, sy:p1y - p2y, x2:p1x, y2:p1y}
+      } else { // p1 is top right
+        return {x:p2x, y:p1y, sx:p1x-p2x, sy:p2y - p1y, x2:p1x, y2:p2y}
+      }
+    } else { // less than
+      if(p1y > p2y){ // p1 is bottom left
+        return {x:p1x, y:p2y, sx:p2x-p1x, sy:p1y - p2y, x2:p2x, y2:p1y}
+      } else { // p1 top left
+        return {x:p1x, y:p1y, sx:p2x-p1x, sy:p2y - p1y, x2:p2x, y2:p2y}
+      }
+    }
+  }
+
+  /**
    * Loop around on a value
    * @param index the current index position
    * @param length the maximum value before the loop resets to 0
