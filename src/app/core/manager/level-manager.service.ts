@@ -135,18 +135,21 @@ class TestLevel extends LevelInstance {
     bi.setGoal(patrol);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(2,3).setTileEntity(bi);
 
     // patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
-    bi = new BotInstance({},2,33,1,1,2*32,33*32);
+    bi = new BotInstance({},2,23,1,1,2*32,23*32);
     bi.setGoal(patrol);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(2,23).setTileEntity(bi);
 
     let moveTo = LogicFactoryService.createMoveTo([{x:39,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     bi = new BotInstance({},5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(5,33).setTileEntity(bi);
 
     // create the resources tracker
 

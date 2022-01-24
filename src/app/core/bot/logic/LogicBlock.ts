@@ -23,7 +23,7 @@ export interface LogicBlock {
  */
 export abstract class AbstractLogicBlock implements LogicBlock {
   protected logicId:string; // unique for each logic block.
-  protected logicLoadedId:string; // unique for each logic block.
+  protected logicLoadedId:string; // has this ever been initialised before
   constructor(namePrefix) {
     // call AI here to workout more waypoints to get around obsticals?
     this.logicId = 'lbi-'+namePrefix+'-'+ Date.now();

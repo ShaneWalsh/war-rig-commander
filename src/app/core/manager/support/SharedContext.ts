@@ -24,6 +24,9 @@ export class SharedContext {
   getSharedVariable(variable: string):any {
     return this.sharedVariables.get(variable);
   }
+  getSharedVariableOrDefault(variable: string, defaultValue:any):any {
+    return (this.sharedVariables.has(variable)) ? this.sharedVariables.get(variable):defaultValue;
+  }
   setSharedVariable(variable: string, val: any):any {
     return this.sharedVariables.set(variable, val);
   }

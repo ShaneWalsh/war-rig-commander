@@ -14,4 +14,7 @@ export class Opt {
     return (this.isPresent())? this.value: null;
   }
 
+  public static empty():Opt{
+    return new Opt(null);
+  }
 }

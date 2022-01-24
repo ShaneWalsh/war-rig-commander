@@ -1,5 +1,6 @@
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
+import { Opt } from "src/app/core/Opt";
 import { LogicService } from "src/app/services/logic.service";
 import { MoveToLogic } from "./MoveToLogic";
 
@@ -34,9 +35,9 @@ export class PatrolLogic extends MoveToLogic {
   /**
    * Calculate the patrol route.
    */
-  getPath(logicContext: LogicContext) {
-    let path = logicContext.getSharedVariable(this.pathSharedVarId);
-    if(path == null) { // TODO should this be a shared variable so others can reuse the same path?
+  getPath(logicContext: LogicContext):Opt {
+    let pathOpt:Opt = logicContext.getSharedVariableOrDefault(this.pathSharedVarId, Opt.empty());
+    if(!pathOpt.isPresent()) { // TODO should this be a shared variable so others can reuse the same path?
       let pathCal = [];
       let point0 = this.points[0];
       let pointA = point0;
@@ -47,20 +48,22 @@ export class PatrolLogic extends MoveToLogic {
       }
       // maps from the final point back to the start again
       pathCal = pathCal.concat(PathfinderService.getSinglePath(pointA.x,pointA.y,point0.x,point0.y,logicContext.levelInstance.getMap()));
-      if(pathCal != null){
-        path = pathCal;
-        logicContext.setSharedVariable(this.pathSharedVarId,path);
+      if(pathCal != null) {
+        const finalPath = new Opt(pathCal);
+        logicContext.setSharedVariable(this.pathSharedVarId,finalPath);
+        return finalPath;
       }
     }
-    return path;
+    return pathOpt;
   }
 
   /**
    * Get the bot from where they are now, back to the last point they were on on the patrol route.
    */
   getToFirstPoint(logicContext: LogicContext) {
-    let path = this.getPath(logicContext);
-    if(path != null) {
+    let pathOpt:Opt = this.getPath(logicContext);
+    if(pathOpt.isPresent()) {
+      let path = pathOpt.get();
       let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
       let nextPoint = path[currentPoint];
       const bi = logicContext.getBotInstance();

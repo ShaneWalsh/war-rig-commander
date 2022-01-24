@@ -85,7 +85,7 @@ export class LogicSequence {
     // execute block logic and if complete update index
     const block = this.logicBlocks[logicVarBlockIndex];
     if(block.update(logicContext)) {
-      if( (logicVarBlockIndex+1) === this.logicBlocks.length && !this.logicBlocks){
+      if( (logicVarBlockIndex+1) === this.logicBlocks.length && !this.loopBlocks){
         return true; // Scenario complete
       } else {
         logicVarBlockIndex = LogicService.incrementLoop(logicVarBlockIndex,this.logicBlocks.length);
