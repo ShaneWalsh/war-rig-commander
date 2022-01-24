@@ -1,7 +1,9 @@
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
+import { MapTile } from "src/app/core/map/LevelMap";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
 import { Opt } from "src/app/core/Opt";
 import { LogicService } from "src/app/services/logic.service";
+import { BotInstance } from "../../BotInstance";
 import { TurretDirection } from "../../rotation/BulletDirection";
 import { AbstractLogicBlock } from "../LogicBlock";
 
@@ -35,11 +37,12 @@ export class MoveToLogic extends AbstractLogicBlock {
       let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
       let nextPoint = path[currentPoint];
       const botInstance = logicContext.getBotInstance();
+      const li = logicContext.levelInstance;
 
       if(botInstance.tileX == nextPoint.x && botInstance.tileY == nextPoint.y) {
         currentPoint = LogicService.incrementLoop(currentPoint, path.length);
         if(currentPoint == 0 && !this.loopPath) { // we are done, we have gone to the end of the path.
-          return true;
+          return this.atCenter(logicContext, botInstance, li.getMap().get(nextPoint.x,nextPoint.y)); // lets try and center in the tile
         }
         nextPoint = path[currentPoint];
         if(nextPoint == null) {
@@ -51,7 +54,6 @@ export class MoveToLogic extends AbstractLogicBlock {
         logicContext.removeLocalVariable(this.moveDirectionVarId);
       }
 
-      const li = logicContext.levelInstance;
       let nextTile = li.getMap().get(nextPoint.x,nextPoint.y);
 
       // TODO can I move into the target tile?
@@ -99,6 +101,21 @@ export class MoveToLogic extends AbstractLogicBlock {
     } else { // we have no path for whatever reason, so return.
       return true;
     }
+  }
+
+  /**
+   * Will continue the on the path and center on the targetted tile
+   */
+  private atCenter(logicContext:LogicContext, bi:BotInstance, nextPoint: MapTile ): boolean {
+    let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
+    if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextPoint.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextPoint.getCenterY(),moveDirection.speed)){
+      return true; // Complete, finish movement Logic.
+    } else { // nudge close to the center of the tile.
+      moveDirection.update(bi.getCenterX(),bi.getCenterY());
+      bi.posX += moveDirection.speed * moveDirection.directionX;
+      bi.posY += moveDirection.speed * moveDirection.directionY;
+    }
+    return false;
   }
 
   private calcPath(logicContext: LogicContext) {
