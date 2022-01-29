@@ -228,10 +228,10 @@ export class LogicService {
 
   // https://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not/37865332#37865332
   public static isPointInRectangle(m:{x,y}, r: {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}} ):boolean {
-    var AB = LogicService.vector(r.TL, r.TR);
-    var AM = LogicService.vector(r.TL, m);
-    var BC = LogicService.vector(r.TR, r.BL);
-    var BM = LogicService.vector(r.TR, m);
+    var AB = LogicService.vector(r.BL, r.TL);
+    var AM = LogicService.vector(r.BL, m);
+    var BC = LogicService.vector(r.TL, r.TR);
+    var BM = LogicService.vector(r.TL, m);
     var dotABAM = LogicService.dot(AB, AM);
     var dotABAB = LogicService.dot(AB, AB);
     var dotBCBM = LogicService.dot(BC, BM);

@@ -1,12 +1,13 @@
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
-import { MapTile } from "src/app/core/map/LevelMap";
+import { MapTile, TraverseStatus } from "src/app/core/map/LevelMap";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
 import { Opt } from "src/app/core/Opt";
 import { ConfigService } from "src/app/services/config.service";
 import { LogicService } from "src/app/services/logic.service";
 import { BotInstance } from "../../BotInstance";
 import { TurretDirection } from "../../rotation/BulletDirection";
-import { AbstractLogicBlock } from "../LogicBlock";
+import { AbstractLogicBlock, LogicBlockStatus } from "../LogicBlock";
+import { WaitLogic } from "../utility/WaitLogic";
 
 
 export class MoveToLogic extends AbstractLogicBlock {
@@ -20,7 +21,7 @@ export class MoveToLogic extends AbstractLogicBlock {
   protected currentPointVarId = this.logicId+'-currentPoint';
   protected moveDirectionVarId = this.logicId+'-moveDirection';
   protected headDirectionVarId = this.logicId+'-headDirection';
-  protected pathVarId = this.logicId+'-Path'; // the actual path
+  protected pathVarId = this.logicId+'-Path'; // the actual path, unique for each bot, because they can start from different palces.
 
   constructor(public points:{x,y}[], public loopPath=false, public LogicCode='MoveTo') {
     super(LogicCode);
@@ -40,6 +41,9 @@ export class MoveToLogic extends AbstractLogicBlock {
       const botInstance = logicContext.getBotInstance();
       const li = logicContext.levelInstance;
 
+      // am I at the current tile?
+        // loop is done, if not looping, move to center
+        // else get next point
       if(botInstance.tileX == nextPoint.x && botInstance.tileY == nextPoint.y) {
         currentPoint = LogicService.incrementLoop(currentPoint, path.length);
         if(currentPoint == 0 && !this.loopPath) { // we are done, we have gone to the end of the path.
@@ -48,7 +52,7 @@ export class MoveToLogic extends AbstractLogicBlock {
         }
         nextPoint = path[currentPoint];
         if(nextPoint == null) {
-          console.error("Why is this null!"); // TODO handle this correctly, how to push this up the line?
+          console.log("Why is this null!"); // TODO handle this correctly, how to push this up the line?
           this.complete(logicContext);
           return;
         }
@@ -59,52 +63,68 @@ export class MoveToLogic extends AbstractLogicBlock {
 
       let nextTile:MapTile = li.getMap().get(nextPoint.x,nextPoint.y);
 
-      const traversalStatus = nextTile.getTraverseStatus();
+      this.checkTraversal(logicContext, botInstance, nextTile.getTraverseStatus());
+      if ( this.canContinue(logicContext) && this.getStatus(logicContext) === LogicBlockStatus.INPROGRESS ) { // may have been blocked
+        // TODO can I move into the target tile?
+          // Something may have changed since the path was chosen, perhaps, its now blocked.
+            // IF blocked, pathfind again? but not if its going to move out of my way?
+              // is it moving?
+                // is it heading away from me,
+                  // then just wait for it to move away.
+                // towards me
+                  // then I should move around it, if I can. or turn around,
+                  // or just stop, 'say path is blocked here sir'.
 
-      // TODO can I move into the target tile?
-        // Something may have changed since the path was chosen, perhaps, its now blocked.
-          // IF blocked, pathfind again? but not if its going to move out of my way?
-            // is it moving?
-              // is it heading away from me,
-                // then just wait for it to move away.
-              // towards me
-                // then I should move around it, if I can. or turn around,
-                // or just stop, 'say path is blocked here sir'.
+        let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
+        if ( moveDirection == null ) {
+          moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
+          logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
+        } else {
+          moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
+        }
 
-      let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
-      if(moveDirection == null) {
-        moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
-        logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
-      } else {
-        moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
-      }
+        // TODO facing, the right way, then rotate before moving?
 
-      // TODO facing, the right way, then rotate before moving?
+        // Free to move, so move.
+        botInstance.posX += moveDirection.speed * moveDirection.directionX;
+        botInstance.posY += moveDirection.speed * moveDirection.directionY;
 
-      // Free to move, so move.
-      botInstance.posX += moveDirection.speed * moveDirection.directionX;
-      botInstance.posY += moveDirection.speed * moveDirection.directionY;
+        // TODO what tile am I in now? after moving? Need to update my tile(s)
+        if ( LogicService.isPointInRectangle(botInstance.getTopLeftTileCenterCords(),nextTile.getCornerCords()) ) {
+          let currentTile = li.getMap().get(botInstance.tileX,botInstance.tileY);
+          // TODO handle the existing entity in the tile of there is one, what happens to it? Right now its just vanishing.
+          currentTile.removeTileEntity();
+          nextTile.setTileEntity(botInstance);
+          botInstance.tileX = nextTile.x
+          botInstance.tileY = nextTile.y
+          // TODO update all tiles of the move, Some bots can be bigger than one tile?
+          // TODO check if its occupied by anything that I can crush, if so, crush it, IF!!! our hitboxes intersect.
 
-      // TODO what tile am I in now? after moving? Need to update my tile(s)
-      if(LogicService.isPointInRectangle(botInstance.getTopLeftTileCenterCords(),nextTile.getCornerCords())){
-        let currentTile = li.getMap().get(botInstance.tileX,botInstance.tileY);
-        // TODO handle the existing entity in the tile of there is one, what happens to it? Right now its just vanishing.
-        currentTile.removeTileEntity();
-        nextTile.setTileEntity(botInstance);
-        botInstance.tileX = nextTile.x
-        botInstance.tileY = nextTile.y
-        // TODO update all tiles of the move, Some bots can be bigger than one tile?
-        // TODO check if its occupied by anything that I can crush, if so, crush it, IF!!! our hitboxes intersect.
-
-        // TODO  can I determine which tiles I am moving to and set a State?
-          // on a change of direction, new waypoint, this should be set, can then be used in next calculations.
-          // TL, T, TR
-          // L, NA, R
-          // BL, B, BR
+          // TODO  can I determine which tiles I am moving to and set a State?
+            // on a change of direction, new waypoint, this should be set, can then be used in next calculations.
+            // TL, T, TR
+            // L, NA, R
+            // BL, B, BR
+        }
       }
     } else { // we have no path for whatever reason, so return.
-      if(ConfigService.isDebugLogic) console.log("We have no path for whatever reason, completeing move to logic");
+      if(ConfigService.isDebugLogic) console.log("We have no path for whatever reason, completing move to logic");
       this.complete(logicContext);
+    }
+    //console.log("ID:"+this.logicId + " Complete:" +this.isComplete(logicContext) + " Status:"+this.getStatus(logicContext));
+  }
+
+  private checkTraversal(logicContext:LogicContext, botInstance:BotInstance, traverseStatus: TraverseStatus) {
+    if(!traverseStatus.passable) { // hmmm, then we are completely blocked.
+      this.blocked(logicContext);
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Not passable tile.");
+    }
+    if(traverseStatus.entityOccupied && traverseStatus.tile.tileEntity !== botInstance) {
+      this.setStatus(logicContext, LogicBlockStatus.BLOCKED);
+      // TODO set unblock strageties?
+        // once those are exhausted, we have to end the block in failure.
+      logicContext.setLocalVariable(this.logicUnblockStrategiesId,[new WaitLogic(1200, (logicContext:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() } )])
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Tile Occupied by Entity");
     }
   }
 
@@ -114,6 +134,7 @@ export class MoveToLogic extends AbstractLogicBlock {
   private moveToCenter(logicContext:LogicContext, bi:BotInstance, nextPoint: MapTile ): boolean {
     let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
     if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextPoint.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextPoint.getCenterY(),moveDirection.speed)){
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: At center of tile.");
       return this.complete(logicContext); // Complete, finish movement Logic.
     } else { // nudge close to the center of the tile.
       moveDirection.update(bi.getCenterX(),bi.getCenterY());

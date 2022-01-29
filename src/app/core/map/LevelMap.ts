@@ -141,7 +141,7 @@ export class MapTile {
 
   getTraverseStatus() : TraverseStatus {
     // TODO update this object when things change rather than building it every time.
-    return new TraverseStatus(this,
+    return new TraverseStatus( this,
       this.passable,
       false,false, // construct
       false, false, // item
@@ -167,14 +167,14 @@ export class TraverseStatus {
   // maybe add speed slowdown/speed up? or the max speed the terrain supports?
 
   constructor(
-    tile:MapTile,
-    passable:boolean=true,
-    constructOccupied:boolean=false,
-    constructCrushable:boolean=false,
-    itemOccupied:boolean=false,
-    itemCrushable:boolean=false,
-    entityOccupied:boolean=false,
-    entityCrushable:boolean=false,
+    public tile:MapTile,
+    public passable:boolean=true,
+    public constructOccupied:boolean=false,
+    public constructCrushable:boolean=false,
+    public itemOccupied:boolean=false,
+    public itemCrushable:boolean=false,
+    public entityOccupied:boolean=false,
+    public entityCrushable:boolean=false,
   ){
 
   }

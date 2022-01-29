@@ -12,8 +12,8 @@ export class PatrolLogic extends MoveToLogic {
     this.getToFirstPoint(logicContext);
   }
 
-  private pathToPatrolVarId = this.logicId+'-PathToPatrol'; // move to patrol route.
-  private pathSharedVarId = this.logicId+'-PathSharedPatrol'; // move to patrol route.
+  private pathToPatrolVarId = this.logicId+'-PathToPatrol'; // move to patrol route. unique per bot they all start different places.
+  private pathSharedVarId = this.logicId+'-PathSharedPatrol'; // patrol route, shared by all bots, same route.a
 
   constructor(public points:{x,y}[]) {
     super(points,true,'Patrol');

@@ -4,6 +4,7 @@ import { TileEntity } from "../../TileEntity";
 import { CanvasContainer } from "./display/CanvasContainer";
 import { LevelInstance } from "./level/LevelInstance";
 import { UiSettings } from "./display/UiSettings";
+import { LogicBlock } from "../../bot/logic/LogicBlock";
 
 export class SharedContext {
   tileEntity:TileEntity = null;
@@ -64,6 +65,14 @@ export class LogicContext extends SharedContext {
   }
   setPathfinderService(value: PathfinderService) {
     this.pathfinderService = value;
+  }
+
+  clearLocalVariables(logicId: string) {
+    const map = this.tileEntity.getLogicVariables();
+    const matchingKeys = [...map.keys()].filter((key) => key.startsWith(logicId));
+    matchingKeys.forEach(key => {
+      map.delete(key);
+    });
   }
 
 }
