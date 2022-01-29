@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 export class ConfigService {
 
   public static isDebug:boolean=true;
+  public static isDebugLogic:boolean=true;
 
   constructor() { }
 

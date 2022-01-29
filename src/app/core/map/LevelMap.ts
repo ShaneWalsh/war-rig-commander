@@ -87,7 +87,10 @@ export class MapTile {
   public posY:number;
   public centerX:number;
   public centerY:number;
-  public tileEntity: TileEntity = null;
+  // Layers of a tile. Terrain type, construct, item, entity
+  public tileConstruct: TileEntity = null; // gate? bridge? train track?
+  public tileItem: TileEntity = null; // lump of gold, piece of a mech, resoruces, water
+  public tileEntity: TileEntity = null; // moving, thinking bot.
 
   public cornerCords:{TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}};
 
@@ -95,7 +98,7 @@ export class MapTile {
     map:LevelMap,
     public x:number,
     public y:number,
-    public color:string,
+    public color:string, // TODO replace with a terrain type
     public passable:boolean = true ) {
     this.updateCords(map);
   }
@@ -136,6 +139,16 @@ export class MapTile {
             y:((this.y*uiSet.tileSize)-uiSet.curY)}
   }
 
+  getTraverseStatus() : TraverseStatus {
+    // TODO update this object when things change rather than building it every time.
+    return new TraverseStatus(this,
+      this.passable,
+      false,false, // construct
+      false, false, // item
+      this.optTileEntity().isPresent(),false // entity
+      );
+  }
+
   draw(dc: DrawingContext,x,y) {
     const uiSet = dc.uiSet;
     LogicService.drawBox(
@@ -145,6 +158,25 @@ export class MapTile {
       uiSet.tileSize,
       dc.cc.bgCtx,this.color,"#FFEEDD");
     this.tileEntity?.draw(dc);
+  }
+
+}
+
+export class TraverseStatus {
+
+  // maybe add speed slowdown/speed up? or the max speed the terrain supports?
+
+  constructor(
+    tile:MapTile,
+    passable:boolean=true,
+    constructOccupied:boolean=false,
+    constructCrushable:boolean=false,
+    itemOccupied:boolean=false,
+    itemCrushable:boolean=false,
+    entityOccupied:boolean=false,
+    entityCrushable:boolean=false,
+  ){
+
   }
 
 }

@@ -2,6 +2,7 @@ import { LogicContext } from "src/app/core/manager/support/SharedContext";
 import { MapTile } from "src/app/core/map/LevelMap";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
 import { Opt } from "src/app/core/Opt";
+import { ConfigService } from "src/app/services/config.service";
 import { LogicService } from "src/app/services/logic.service";
 import { BotInstance } from "../../BotInstance";
 import { TurretDirection } from "../../rotation/BulletDirection";
@@ -47,14 +48,16 @@ export class MoveToLogic extends AbstractLogicBlock {
         nextPoint = path[currentPoint];
         if(nextPoint == null) {
           console.error("Why is this null!"); // TODO handle this correctly, how to push this up the line?
-          return true;
+          return this.complete(logicContext);
         }
         logicContext.setLocalVariable(this.currentPointVarId,currentPoint);
         logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(botInstance.getTileCords(),nextPoint));
         logicContext.removeLocalVariable(this.moveDirectionVarId);
       }
 
-      let nextTile = li.getMap().get(nextPoint.x,nextPoint.y);
+      let nextTile:MapTile = li.getMap().get(nextPoint.x,nextPoint.y);
+
+      const traversalStatus = nextTile.getTraverseStatus();
 
       // TODO can I move into the target tile?
         // Something may have changed since the path was chosen, perhaps, its now blocked.
@@ -97,10 +100,11 @@ export class MoveToLogic extends AbstractLogicBlock {
           // L, NA, R
           // BL, B, BR
       }
-      return false;
     } else { // we have no path for whatever reason, so return.
-      return true;
+      if(ConfigService.isDebugLogic) console.log("We have no path for whatever reason, completeing move to logic");
+      return this.complete(logicContext);
     }
+    return this.isComplete(logicContext);
   }
 
   /**

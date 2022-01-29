@@ -24,11 +24,12 @@ export interface LogicBlock {
 export abstract class AbstractLogicBlock implements LogicBlock {
   protected logicId:string; // unique for each logic block.
   protected logicLoadedId:string; // has this ever been initialised before
+  protected logicCompleteId:string; // utility, can be called by logic to complete the block.
   constructor(namePrefix) {
     // call AI here to workout more waypoints to get around obsticals?
     this.logicId = 'lbi-'+namePrefix+'-'+ Date.now();
     this.logicLoadedId = this.logicId+'-Loaded';
-
+    this.logicCompleteId = this.logicId+'-logicComplete';
   }
 
   load(logicContext: LogicContext) {
@@ -52,5 +53,20 @@ export abstract class AbstractLogicBlock implements LogicBlock {
    * @param logicContext
    */
   abstract reload(logicContext: LogicContext);
+
+  /**
+   * Utility functions to mark a logic block as complete
+   */
+  complete(logicContext: LogicContext):boolean{
+    logicContext.setLocalVariable(this.logicCompleteId,true);
+    return true;
+  }
+  isComplete(logicContext: LogicContext, defaultAns:boolean=false):boolean{
+    return logicContext.getLocalVariableOrDefault(this.logicCompleteId,defaultAns);
+  }
+  /**Should the logic block continue */
+  continue(logicContext: LogicContext):boolean{
+    return !logicContext.getLocalVariableOrDefault(this.logicCompleteId,false);
+  }
 }
 
