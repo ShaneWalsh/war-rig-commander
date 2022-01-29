@@ -19,17 +19,15 @@ export class PatrolLogic extends MoveToLogic {
     super(points,true,'Patrol');
   }
 
-  update(logicContext:LogicContext):boolean {
-
+  updateLogic(logicContext:LogicContext) {
     let proceed = true;
     let pathToPatrol:MoveToLogic = logicContext.getLocalVariable(this.pathToPatrolVarId)
     if(pathToPatrol){
       proceed = pathToPatrol.update(logicContext);
       if(proceed) logicContext.removeLocalVariable(this.pathToPatrolVarId)
     } else {
-      return super.updatePath(logicContext,logicContext.getSharedVariable(this.pathSharedVarId));
+      super.updatePath(logicContext,logicContext.getSharedVariable(this.pathSharedVarId));
     }
-    return false;
   }
 
   /**

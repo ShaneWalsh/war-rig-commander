@@ -5,7 +5,7 @@ export class SentryLogic extends AbstractLogicBlock {
   firstLoad(logicContext: LogicContext) {
 
   }
-  update(logicContext: LogicContext): boolean {
+  updateLogic(logicContext: LogicContext) {
     return false;
   }
   reload(logicContext: LogicContext) {

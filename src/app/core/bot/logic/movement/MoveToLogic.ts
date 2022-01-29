@@ -26,13 +26,13 @@ export class MoveToLogic extends AbstractLogicBlock {
     super(LogicCode);
   }
 
-  update(logicContext:LogicContext):boolean {
+  updateLogic(logicContext:LogicContext) {
     // if the point has changed, change the turn direction.
     let pathOpt = logicContext.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
-    return this.updatePath(logicContext,pathOpt);
+    this.updatePath(logicContext,pathOpt);
   }
 
-  updatePath(logicContext:LogicContext, pathOpt:Opt): boolean {
+  updatePath(logicContext:LogicContext, pathOpt:Opt) {
     if(pathOpt.isPresent()) {
       let path = pathOpt.get();
       let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
@@ -43,12 +43,14 @@ export class MoveToLogic extends AbstractLogicBlock {
       if(botInstance.tileX == nextPoint.x && botInstance.tileY == nextPoint.y) {
         currentPoint = LogicService.incrementLoop(currentPoint, path.length);
         if(currentPoint == 0 && !this.loopPath) { // we are done, we have gone to the end of the path.
-          return this.atCenter(logicContext, botInstance, li.getMap().get(nextPoint.x,nextPoint.y)); // lets try and center in the tile
+          this.moveToCenter(logicContext, botInstance, li.getMap().get(nextPoint.x,nextPoint.y)); // lets try and center in the tile
+          return;
         }
         nextPoint = path[currentPoint];
         if(nextPoint == null) {
           console.error("Why is this null!"); // TODO handle this correctly, how to push this up the line?
-          return this.complete(logicContext);
+          this.complete(logicContext);
+          return;
         }
         logicContext.setLocalVariable(this.currentPointVarId,currentPoint);
         logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(botInstance.getTileCords(),nextPoint));
@@ -102,24 +104,22 @@ export class MoveToLogic extends AbstractLogicBlock {
       }
     } else { // we have no path for whatever reason, so return.
       if(ConfigService.isDebugLogic) console.log("We have no path for whatever reason, completeing move to logic");
-      return this.complete(logicContext);
+      this.complete(logicContext);
     }
-    return this.isComplete(logicContext);
   }
 
   /**
    * Will continue the on the path and center on the targetted tile
    */
-  private atCenter(logicContext:LogicContext, bi:BotInstance, nextPoint: MapTile ): boolean {
+  private moveToCenter(logicContext:LogicContext, bi:BotInstance, nextPoint: MapTile ): boolean {
     let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
     if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextPoint.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextPoint.getCenterY(),moveDirection.speed)){
-      return true; // Complete, finish movement Logic.
+      return this.complete(logicContext); // Complete, finish movement Logic.
     } else { // nudge close to the center of the tile.
       moveDirection.update(bi.getCenterX(),bi.getCenterY());
       bi.posX += moveDirection.speed * moveDirection.directionX;
       bi.posY += moveDirection.speed * moveDirection.directionY;
     }
-    return false;
   }
 
   private calcPath(logicContext: LogicContext) {
