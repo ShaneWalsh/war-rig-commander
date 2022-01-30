@@ -90,6 +90,7 @@ export class LogicSequence {
       console.log("Block:"+ block.getId() +" Complete");
       if( (logicVarBlockIndex+1) === this.logicBlocks.length && !this.loopBlocks){
         console.log("Scen:"+ this.logicSequenceId +" Complete");
+        // TODO clear down all of the logic block local varisbles.
         return true; // Scenario complete
       } else {
         logicVarBlockIndex = LogicService.incrementLoop(logicVarBlockIndex,this.logicBlocks.length);

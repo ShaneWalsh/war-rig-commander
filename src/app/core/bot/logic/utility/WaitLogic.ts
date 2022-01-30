@@ -7,7 +7,7 @@ export class WaitLogic extends AbstractLogicBlock {
 
   protected waitCounterVarId = this.logicId+'-waitCounter';
 
-  constructor(public waitTicks:number=120, public breakWaitEarly:any=null) {
+  constructor(public waitTicks:number=120, public breakWaitEarly:any=null, public doWhileWaiting:any=null) {
     super("Wait");
   }
 
@@ -19,6 +19,9 @@ export class WaitLogic extends AbstractLogicBlock {
         this.complete(logicContext);
         return;
       }
+    }
+    if(this.doWhileWaiting != null){
+      this.doWhileWaiting(logicContext);
     }
     let waitCounter = logicContext.getLocalVariableOrDefault(this.waitCounterVarId, 0);
     waitCounter = LogicService.incrementLoop(waitCounter, this.waitTicks);

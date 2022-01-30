@@ -1,3 +1,4 @@
+import { LevelInstance } from "src/app/core/manager/support/level/LevelInstance";
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
 import { MapTile, TraverseStatus } from "src/app/core/map/LevelMap";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
@@ -63,7 +64,7 @@ export class MoveToLogic extends AbstractLogicBlock {
 
       let nextTile:MapTile = li.getMap().get(nextPoint.x,nextPoint.y);
 
-      this.checkTraversal(logicContext, botInstance, nextTile.getTraverseStatus());
+      this.checkTraversal(logicContext, botInstance, nextTile.getTraverseStatus(),li);
       if ( this.canContinue(logicContext) && this.getStatus(logicContext) === LogicBlockStatus.INPROGRESS ) { // may have been blocked
         // TODO can I move into the target tile?
           // Something may have changed since the path was chosen, perhaps, its now blocked.
@@ -75,13 +76,8 @@ export class MoveToLogic extends AbstractLogicBlock {
                   // then I should move around it, if I can. or turn around,
                   // or just stop, 'say path is blocked here sir'.
 
-        let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
-        if ( moveDirection == null ) {
-          moveDirection =  TurretDirection.calculateTurretDirection(botInstance.getCenterX(),botInstance.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
-          logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
-        } else {
-          moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
-        }
+        let moveDirection:TurretDirection = this.getOrCreateTurret(logicContext,botInstance, nextTile);
+        moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
 
         // TODO facing, the right way, then rotate before moving?
 
@@ -114,16 +110,25 @@ export class MoveToLogic extends AbstractLogicBlock {
     //console.log("ID:"+this.logicId + " Complete:" +this.isComplete(logicContext) + " Status:"+this.getStatus(logicContext));
   }
 
-  private checkTraversal(logicContext:LogicContext, botInstance:BotInstance, traverseStatus: TraverseStatus) {
+  private checkTraversal(logicContext:LogicContext, bi:BotInstance, traverseStatus: TraverseStatus, li:LevelInstance) {
     if(!traverseStatus.passable) { // hmmm, then we are completely blocked.
       this.blocked(logicContext);
       console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Not passable tile.");
     }
-    if(traverseStatus.entityOccupied && traverseStatus.tile.tileEntity !== botInstance) {
+    if(traverseStatus.entityOccupied && traverseStatus.tile.tileEntity !== bi) {
       this.setStatus(logicContext, LogicBlockStatus.BLOCKED);
-      // TODO set unblock strageties?
-        // once those are exhausted, we have to end the block in failure.
-      logicContext.setLocalVariable(this.logicUnblockStrategiesId,[new WaitLogic(1200, (logicContext:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() } )])
+      // TODO set unblock strageties? // once those are exhausted, we have to end the block in failure.
+      logicContext.setLocalVariable(this.logicUnblockStrategiesId,
+        [new WaitLogic(3600,
+          (logicContext:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() },
+          (logicContext:LogicContext) => { let nextTile = li.getMap().get(bi.tileX,bi.tileY);
+            let moveDirection =  TurretDirection.calculateTurretDirection(bi.getCenterX(),bi.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
+            if( !(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextTile.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextTile.getCenterY(),moveDirection.speed))){
+              bi.posX += moveDirection.speed * moveDirection.directionX;
+              bi.posY += moveDirection.speed * moveDirection.directionY;
+            }
+          },
+        )])
       console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Tile Occupied by Entity");
     }
   }
@@ -131,9 +136,9 @@ export class MoveToLogic extends AbstractLogicBlock {
   /**
    * Will continue the on the path and center on the targetted tile
    */
-  private moveToCenter(logicContext:LogicContext, bi:BotInstance, nextPoint: MapTile ): boolean {
-    let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
-    if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextPoint.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextPoint.getCenterY(),moveDirection.speed)){
+  private moveToCenter(logicContext:LogicContext, bi:BotInstance, nextTile: MapTile ): boolean {
+    let moveDirection:TurretDirection = this.getOrCreateTurret(logicContext,bi, nextTile);
+    if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextTile.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextTile.getCenterY(),moveDirection.speed)){
       console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: At center of tile.");
       return this.complete(logicContext); // Complete, finish movement Logic.
     } else { // nudge close to the center of the tile.
@@ -141,6 +146,15 @@ export class MoveToLogic extends AbstractLogicBlock {
       bi.posX += moveDirection.speed * moveDirection.directionX;
       bi.posY += moveDirection.speed * moveDirection.directionY;
     }
+  }
+
+  getOrCreateTurret(logicContext:LogicContext, bi:BotInstance, nextTile: MapTile ):TurretDirection{
+    let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
+    if ( moveDirection == null ) {
+      moveDirection =  TurretDirection.calculateTurretDirection(bi.getCenterX(),bi.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
+      logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
+    }
+    return moveDirection;
   }
 
   private calcPath(logicContext: LogicContext) {

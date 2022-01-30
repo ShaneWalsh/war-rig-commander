@@ -24,7 +24,10 @@ export class PatrolLogic extends MoveToLogic {
     let pathToPatrol:MoveToLogic = logicContext.getLocalVariable(this.pathToPatrolVarId)
     if(pathToPatrol){
       proceed = pathToPatrol.update(logicContext);
-      if(proceed) logicContext.removeLocalVariable(this.pathToPatrolVarId)
+      if(proceed){
+        logicContext.removeLocalVariable(this.pathToPatrolVarId)
+        logicContext.clearLocalVariables(pathToPatrol.getId());
+      }
     } else {
       super.updatePath(logicContext,logicContext.getSharedVariable(this.pathSharedVarId));
     }

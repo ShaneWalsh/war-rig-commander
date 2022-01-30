@@ -74,7 +74,7 @@ export abstract class AbstractLogicBlock implements LogicBlock {
             logicContext.removeLocalVariable(this.logicUnblockStrategiesId);
             this.unBlocked(logicContext);
           } else if(strategyStatus === LogicBlockStatus.FAILURE || strategyStatus === LogicBlockStatus.BLOCKED || strategyStatus === LogicBlockStatus.NA){ // did not succeed
-            // onto the next stragety
+            // TODO onto the next stragety, dont really need this block or condition at all.
             console.log("Should now naturally move to the next strategy")
           }
           if(strategy.length == 0 && strategyStatus !== LogicBlockStatus.SUCCESS) { // no strategies left, + last block failed?
