@@ -90,7 +90,7 @@ export class LogicSequence {
       console.log("Block:"+ block.getId() +" Complete");
       if( (logicVarBlockIndex+1) === this.logicBlocks.length && !this.loopBlocks){
         console.log("Scen:"+ this.logicSequenceId +" Complete");
-        // TODO clear down all of the logic block local varisbles.
+        // TODO clear down all of the logic block local variables.
         return true; // Scenario complete
       } else {
         logicVarBlockIndex = LogicService.incrementLoop(logicVarBlockIndex,this.logicBlocks.length);
@@ -124,8 +124,8 @@ export class BotGoalSimple implements BotGoal {
   goalLoadedVarId: string;
 
   constructor (
-    public currentGoal:LogicScenario,
-    public defaultGoal:LogicScenario, // fallback to somekind of endless scenario if everything is complete, like a sentry mode.
+    public currentScen:LogicScenario,
+    public defaultScen:LogicScenario, // fallback to somekind of endless scenario if everything is complete, like a sentry mode.
     ) {
     this.goalId = 'goal-'+ Date.now();
     this.goalLoadedVarId = this.goalId+'-Loaded';
@@ -133,18 +133,18 @@ export class BotGoalSimple implements BotGoal {
   }
 
   update(logicContext:LogicContext) {
-    let currentGoal:LogicScenario = logicContext.getLocalVariableOrDefault(this.goalCurrentId, this.currentGoal);
+    let currentScen:LogicScenario = logicContext.getLocalVariableOrDefault(this.goalCurrentId, this.currentScen);
     if(!logicContext.getLocalVariableOrDefault(this.goalLoadedVarId,false)){
-      currentGoal.loadScenario(logicContext);
+      currentScen.loadScenario(logicContext);
       logicContext.setLocalVariable(this.goalLoadedVarId,true);
     }
-    currentGoal = currentGoal.checkScenario(logicContext);
-    logicContext.setLocalVariable(this.goalCurrentId,currentGoal);
-    if( currentGoal.update(logicContext)) {
+    currentScen = currentScen.checkScenario(logicContext);
+    logicContext.setLocalVariable(this.goalCurrentId,currentScen);
+    if( currentScen.update(logicContext)) {
       console.log("Goal:"+ this.goalId +" Complete");
-      currentGoal = this.defaultGoal;
-      logicContext.setLocalVariable(this.goalCurrentId,this.defaultGoal);
-      currentGoal.loadScenario(logicContext);
+      currentScen = this.defaultScen;
+      logicContext.setLocalVariable(this.goalCurrentId,this.defaultScen);
+      currentScen.loadScenario(logicContext);
     }
   }
 
