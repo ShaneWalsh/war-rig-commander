@@ -5,6 +5,7 @@ import { AbsTileEntity, TileEntity } from "../TileEntity";
 import { BotBrain } from "./BotBrains";
 import { BotGoal } from "./BotGoal";
 import { BotPart } from "./BotPart";
+import { BotTeam } from "./BotTeam";
 
 /**
  * Default bot
@@ -22,7 +23,7 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   private botParts:BotPart[] = []; // anything that draws on the bot.
 
   private botGoal:BotGoal; //primary brain for moving, deciding where to go, what to do. Not Sensos or guns etc
-
+  private team:BotTeam;
   // speed?
 
   constructor(
@@ -50,8 +51,6 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
       botBrain.think(logicContext);
     });
     // update goal ( move(waypoints), guard(stay within a certain range, unless under attack), escort, attack(move to within range), capture, load, unload, lay )
-    // range?
-    // update brains ( turret? )
     logicContext.clearBotInstance();
   }
 
