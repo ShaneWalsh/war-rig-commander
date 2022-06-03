@@ -1,3 +1,4 @@
+import { Cords } from "./Cords";
 import { Drawer } from "./manager/support/display/Drawer";
 import { UiSettings } from "./manager/support/display/UiSettings";
 import { DrawingContext } from "./manager/support/SharedContext";
@@ -54,8 +55,8 @@ export abstract class AbsTileEntity implements TileEntity {
     return false;
   }
 
-  getTileCords():{x:number,y:number} {
-    return {x:this.tileX, y:this.tileY};
+  getTileCords():Cords {
+    return new Cords(this.tileX, this.tileY);
   }
   getTileSizes():{tileSizeX:number,tileSizeY:number} {
     return {tileSizeX:this.tileSizeX, tileSizeY:this.tileSizeY};

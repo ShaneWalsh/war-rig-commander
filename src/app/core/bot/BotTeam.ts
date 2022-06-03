@@ -1,5 +1,5 @@
 
-enum TeamRelationship {
+export enum TeamRelationship {
   ALLIED="ALLIED",
   NEUTRAL="NEUTRAL", // default if no relationship is estabilished.
   ENEMIES="ENEMIES"
@@ -10,7 +10,7 @@ enum TeamRelationship {
  */
 export class BotTeam {
 
-  constructor(public name:String) {
+  constructor( public name:String, public playerControlled:boolean ) {
 
   }
 
@@ -27,6 +27,7 @@ export class TeamHandler {
   }
 
   getRelationship(teamA:BotTeam, teamB:BotTeam):TeamRelationship {
+    if(teamA === teamB) return TeamRelationship.ALLIED;
     for(let relationship of this.relationships.keys()){
       let values = this.relationships.get(relationship);
       for(let key of values){
@@ -58,7 +59,7 @@ export class TeamHandler {
 class RelationshipKey {
   constructor(public teamA:BotTeam, public teamB:BotTeam){}
   isKey(teamA:BotTeam, teamB:BotTeam) {
-    return (teamA === this.teamA || teamA == this.teamB) && (teamB === this.teamA || teamB == this.teamB);
+    return (teamA === this.teamA && teamB === this.teamB) || (teamB === this.teamA && teamA === this.teamB);
   }
 }
 

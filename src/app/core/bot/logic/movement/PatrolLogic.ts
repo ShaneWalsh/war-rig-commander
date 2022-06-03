@@ -1,3 +1,4 @@
+import { Cords } from "src/app/core/Cords";
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
 import { PathfinderService } from "src/app/core/map/pathfinder.service";
 import { Opt } from "src/app/core/Opt";
@@ -15,7 +16,7 @@ export class PatrolLogic extends MoveToLogic {
   private pathToPatrolVarId = this.logicId+'-PathToPatrol'; // move to patrol route. unique per bot they all start different places.
   private pathSharedVarId = this.logicId+'-PathSharedPatrol'; // patrol route, shared by all bots, same route.a
 
-  constructor(public points:{x,y}[]) {
+  constructor(public points:Cords[]) {
     super(points,true,'Patrol');
   }
 

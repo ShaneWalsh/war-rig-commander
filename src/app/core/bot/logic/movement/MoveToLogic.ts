@@ -1,3 +1,4 @@
+import { Cords } from "src/app/core/Cords";
 import { LevelInstance } from "src/app/core/manager/support/level/LevelInstance";
 import { LogicContext } from "src/app/core/manager/support/SharedContext";
 import { MapTile, TraverseStatus } from "src/app/core/map/LevelMap";
@@ -24,7 +25,7 @@ export class MoveToLogic extends AbstractLogicBlock {
   protected headDirectionVarId = this.logicId+'-headDirection';
   protected pathVarId = this.logicId+'-Path'; // the actual path, unique for each bot, because they can start from different palces.
 
-  constructor(public points:{x,y}[], public loopPath=false, public LogicCode='MoveTo') {
+  constructor(public points:Cords[], public loopPath=false, public LogicCode='MoveTo') {
     super(LogicCode);
   }
 

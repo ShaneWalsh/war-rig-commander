@@ -23,7 +23,7 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   private botParts:BotPart[] = []; // anything that draws on the bot.
 
   private botGoal:BotGoal; //primary brain for moving, deciding where to go, what to do. Not Sensos or guns etc
-  private team:BotTeam;
+  private botTeam:BotTeam = new BotTeam("DEFAULT", false);
   // speed?
 
   constructor(
@@ -85,6 +85,12 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   }
   addPart(botPart:BotPart){
     this.botParts.push(botPart);
+  }
+  getBotTeam():BotTeam {
+    return this.botTeam;
+  }
+  setBotTeam(botTeam:BotTeam) {
+    this.botTeam = botTeam;
   }
 
   getSpeed():number {

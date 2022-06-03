@@ -1,4 +1,5 @@
 import { LogicService } from "src/app/services/logic.service";
+import { Cords } from "../Cords";
 import { Drawer } from "../manager/support/display/Drawer";
 import { UiSettings } from "../manager/support/display/UiSettings";
 import { LogicProcess } from "../manager/support/logic/LogicProcess";
@@ -10,16 +11,17 @@ export class LevelMap implements Drawer, LogicProcess {
   private map:MapTile[][];
   private tileSize = 32;
   private halfTileSize = this.tileSize/2;
-  private size = 90;
+  private mapSizeX = 90;
+  private mapSizeY = 90;
 
   constructor(){
     this.map = new Array();
 
     let randomness = Math.floor((Math.random()*10)+1);
     let randomnessCounter = 0;
-    for(let i =0; i < this.size;i++){
+    for(let i =0; i < this.mapSizeX;i++){
       this.map[i] = new Array();
-      for(let j =0; j < this.size;j++){
+      for(let j =0; j < this.mapSizeY;j++){
         randomnessCounter++;
         if(randomnessCounter >= randomness){
           this.map[i][j] = new MapTile(this, i,j,"#00FFFF",false);
@@ -53,8 +55,8 @@ export class LevelMap implements Drawer, LogicProcess {
 
     let x = 0;
     let y = 0;
-    for(let viewX = uiSet.viewTilesStartPosX; viewX < this.size && viewX < uiSet.viewTilesEndPosX; viewX++,x++){
-      for(let viewY = uiSet.viewTilesStartPosY; viewY < this.size && viewY < uiSet.viewTilesEndPosY; viewY++,y++){
+    for(let viewX = uiSet.viewTilesStartPosX; viewX < this.mapSizeX && viewX < uiSet.viewTilesEndPosX; viewX++,x++){
+      for(let viewY = uiSet.viewTilesStartPosY; viewY < this.mapSizeY && viewY < uiSet.viewTilesEndPosY; viewY++,y++){
         if(viewX >= 0 && viewY >= 0) {
           const tile = this.get(viewX,viewY);
           tile.draw(dc,x,y);
@@ -70,6 +72,17 @@ export class LevelMap implements Drawer, LogicProcess {
 
   getTiles():MapTile[][] {
     return this.map;
+  }
+
+  getTilesWithinSensor(range:number, cords:Cords):MapTile[] {
+    let tiles = [];
+    let bounds = cords.getBounds(range, this.mapSizeX-1, this.mapSizeY-1);
+    for(let i = bounds.left; i <= bounds.right; i++) {
+      for(let j = bounds.up; j <= bounds.down; j++) {
+        tiles.push(this.map[i][j]);
+      }
+    }
+    return tiles;
   }
 
   getTileSize():number {
@@ -124,8 +137,8 @@ export class MapTile {
   getCenterY() {
     return this.centerY;
   }
-  getCords(): {x:number,y:number}{
-    return {x:this.x,y:this.y}
+  getCords(): Cords{
+    return new Cords(this.x,this.y)
   }
   getCornerCords(): {TL:{x,y}, TR:{x,y}, BL:{x,y}, BR:{x,y}}{
     return this.cornerCords;

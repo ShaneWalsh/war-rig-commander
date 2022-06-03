@@ -1,3 +1,4 @@
+import { TeamHandler } from "src/app/core/bot/BotTeam";
 import { CustomKeyboardEvent } from "src/app/services/keyboard-event.service";
 import { LevelMap, MapTile } from "../../../map/LevelMap";
 import { UiLogic } from "../logic/UiLogic";
@@ -10,6 +11,7 @@ export abstract class LevelInstance {
 
   public abstract initLevel();
   public abstract getMap():LevelMap;
+  public abstract getTeamHandler():TeamHandler;
   public abstract getUiLogic():UiLogic;
 
   getMouseMapTile(leftClick: MouseEvent):MapTile {

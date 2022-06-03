@@ -3,6 +3,7 @@ import { BotGoal, BotGoalSimple, LogicScenario, LogicSequence } from '../bot/Bot
 import { MoveToLogic } from '../bot/logic/movement/MoveToLogic';
 import { PatrolLogic } from '../bot/logic/movement/PatrolLogic';
 import { SentryLogic } from '../bot/logic/movement/SentryLogic';
+import { Cords } from '../Cords';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,7 @@ export class LogicFactoryService {
     return new BotGoalSimple(s,s);
   }
 
-  public static createPatrol(points:{x,y}[]):BotGoal {
+  public static createPatrol(points:Cords[]):BotGoal {
     let patrol = new PatrolLogic(points);
     let seq = new LogicSequence([patrol]);
     let patrolScen = new LogicScenario(seq,[]);
@@ -33,7 +34,7 @@ export class LogicFactoryService {
     return botGoal;
   }
 
-  public static createMoveTo(points:{x,y}[]):BotGoal {
+  public static createMoveTo(points:Cords[]):BotGoal {
     let move = new MoveToLogic(points);
     let seq = new LogicSequence([move]);
     let moveScen = new LogicScenario(seq,[]);

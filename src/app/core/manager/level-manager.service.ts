@@ -1,18 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MouseService } from 'src/app/services/mouse.service';
-import { CustomKeyboardEvent, KeyboardEventService } from '../../services/keyboard-event.service';
-import { BotGoalSimple } from '../bot/BotGoal';
+import { KeyboardEventService } from '../../services/keyboard-event.service';
 import { BotInstance } from '../bot/BotInstance';
 import { DrawTestBotPart } from '../bot/BotPart';
+import { BotTeam, TeamHandler, TeamRelationship } from '../bot/BotTeam';
+import { TargetFinder } from '../bot/brain/TargetFinder';
+import { Cords } from '../Cords';
 import { LogicFactoryService } from '../factory/logic-factory.service';
 import { LevelMap } from '../map/LevelMap';
-import { Drawer } from './support/display/Drawer';
 import { LevelInstance } from './support/level/LevelInstance';
-import { LogicProcess } from './support/logic/LogicProcess';
 import { UiLogic } from './support/logic/UiLogic';
 import { ManagerContext } from './support/ManagerContext';
-import { DrawingContext, LogicContext } from './support/SharedContext';
 
 @Injectable({
   providedIn: 'root'
@@ -108,14 +107,18 @@ export class LevelManagerService {
 
 class TestLevel extends LevelInstance {
 
-  map: LevelMap;
-  uiLogic: UiLogic; // TODO it should subscribe to all of the events itself and not be passed them through a 3rd party. Put Mouse service in MC
+  private map: LevelMap;
+  private uiLogic: UiLogic; // TODO it should subscribe to all of the events itself and not be passed them through a 3rd party. Put Mouse service in MC
+  private teamHandler: TeamHandler;
 
-  constructor(mc:ManagerContext){
+  constructor(mc:ManagerContext) {
     super(mc);
   }
 
   public initLevel() {
+
+    let targetFinder = new TargetFinder(5);
+
     // level context, which in this case is
     // 2d map tiles
     // bots/units
@@ -128,11 +131,22 @@ class TestLevel extends LevelInstance {
     this.mc.displayMS.addDrawer(this.map);
     this.mc.logicMS.addLogicProcess(this.map);
 
+    // Teams
+    let btGood = new BotTeam("Goodguys", true);
+    let btAllies = new BotTeam("Allyguys", false);
+    let btBad = new BotTeam("Badguys", false);
+    this.teamHandler = new TeamHandler();
+    this.teamHandler.addOrUpdateRelationship(btGood,btBad,TeamRelationship.ENEMIES);
+    this.teamHandler.addOrUpdateRelationship(btAllies,btBad,TeamRelationship.ENEMIES);
+    this.teamHandler.addOrUpdateRelationship(btAllies,btGood,TeamRelationship.ALLIED);
+
     // create all of the buildings and units etc
     // patrolling unit
-    let patrol = LogicFactoryService.createPatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
+    let patrol = LogicFactoryService.createPatrol([new Cords(9,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
     let bi = new BotInstance({},2,3,1,1,2*32,3*32);
     bi.setGoal(patrol);
+    bi.setBotTeam(btGood);
+    bi.addBrain(targetFinder);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,3).setTileEntity(bi);
@@ -140,13 +154,17 @@ class TestLevel extends LevelInstance {
     // patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
     bi = new BotInstance({},2,23,1,1,2*32,23*32);
     bi.setGoal(patrol);
+    bi.setBotTeam(btGood);
+    bi.addBrain(targetFinder);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,23).setTileEntity(bi);
 
-    let moveTo = LogicFactoryService.createMoveTo([{x:39,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
+    let moveTo = LogicFactoryService.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
     bi = new BotInstance({},5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);
+    bi.setBotTeam(btBad);
+    bi.addBrain(targetFinder);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(5,33).setTileEntity(bi);
@@ -165,5 +183,8 @@ class TestLevel extends LevelInstance {
   }
   public getUiLogic(): UiLogic {
     return this.uiLogic;
+  }
+  public getTeamHandler(): TeamHandler {
+    return this.teamHandler;
   }
 }
