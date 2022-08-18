@@ -72,7 +72,8 @@ export class DisplayManagerService {
   }
 
   public removeDrawer(drawer:Drawer) {
-    this.drawers.splice(this.drawers.indexOf(drawer));
+    const index = this.drawers.indexOf(drawer);
+    if(index > -1){ this.drawers.splice(index,1); }
   }
 
   // #################

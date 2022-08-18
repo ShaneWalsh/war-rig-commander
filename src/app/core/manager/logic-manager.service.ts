@@ -53,9 +53,7 @@ export class LogicManagerService {
 
   public removeLogicProcess(logicProcess:LogicProcess) {
     const index = this.logicProcesses.indexOf(logicProcess);
-    if(index > -1){
-      this.logicProcesses.splice(this.logicProcesses.indexOf(logicProcess));
-    }
+    if(index > -1){ this.logicProcesses.splice(index,1); }
   }
 
   /**

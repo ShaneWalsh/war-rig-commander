@@ -36,7 +36,7 @@ export class SharedContext {
 
 // can easily add more values are required for game logic.
 export class LogicContext extends SharedContext {
-
+  // can easily add more values are required for game logic.
   private pathfinderService: PathfinderService;
 
   constructor(public levelInstance:LevelInstance){
@@ -60,6 +60,10 @@ export class LogicContext extends SharedContext {
   // if the local variable doesnt exist return the default value.
   getLocalVariableOrDefault(variable: string, defaultValue:any):any {
     return (this.tileEntity.getLogicVariables().has(variable)) ? this.getLocalVariable(variable):defaultValue;
+  }
+  // if the local variable doesnt exist then execute function and set it.
+  getLocalVariableOrExec(variable: string, setFunction: () => any): any {
+    return (this.tileEntity.getLogicVariables().has(variable)) ? this.getLocalVariable(variable):setFunction();
   }
   setLocalVariable(variable: string, val: any):any {
     return this.tileEntity.getLogicVariables().set(variable, val);

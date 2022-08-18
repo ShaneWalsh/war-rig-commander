@@ -119,7 +119,7 @@ class TestLevel extends LevelInstance {
   public initLevel() {
 
     let targetFinder = new TargetFinder(5);
-    let turretBrain = new TurretBrain(5,'todo amno','todo config');
+    let turretBrain = new TurretBrain(50,'todo amno','todo config');
 
     // level context, which in this case is
     // 2d map tiles
