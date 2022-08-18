@@ -1,17 +1,14 @@
-import { Injectable } from '@angular/core';
 import { LogicService } from 'src/app/services/logic.service';
+import { BotMissile } from '../bot/BotMissile';
 import { BulletDirection } from '../bot/rotation/BulletDirection';
+import { BotCollision } from '../bot/util/BotColision';
+import { BotDamage } from '../bot/util/BotDamage';
 import { Drawer } from '../manager/support/display/Drawer';
 import { LogicProcess } from '../manager/support/logic/LogicProcess';
 import { DrawingContext, LogicContext } from '../manager/support/SharedContext';
 
-/**
- * Factory methods for all of the bots in the game.
- */
-@Injectable({
-  providedIn: 'root',
-})
-export class BotFactoryService {
+
+export class BotFactory {
   constructor() {}
 
   // Generic bullet for testing.
@@ -24,7 +21,7 @@ export class BotFactoryService {
   }
 }
 
-class Missile implements LogicProcess, Drawer {
+class Missile implements LogicProcess, Drawer, BotMissile {
   constructor(
     public posX: number,
     public posY: number,
@@ -36,15 +33,7 @@ class Missile implements LogicProcess, Drawer {
   draw(dc: DrawingContext) {
     const uiSet = dc.uiSet;
     // TODO replace with animation at some point.
-    LogicService.drawBox(
-      this.posX - uiSet.curX,
-      this.posY - uiSet.curY,
-      this.sizeX,
-      this.sizeY,
-      dc.cc.groundCtx,
-      '#00FFFF',
-      '#FF00FF'
-    );
+    LogicService.drawBox(this.posX - uiSet.curX,this.posY - uiSet.curY,this.sizeX,this.sizeY,dc.cc.groundCtx,'#00FFFF','#FF00FF');
   }
 
   init(logicContext: LogicContext) {
@@ -60,19 +49,31 @@ class Missile implements LogicProcess, Drawer {
   colisionDetection(logicContext: LogicContext) {
     let tile = logicContext.levelInstance.getMap().locateTile(this.posX,this.posY);
     if(tile !== null) {
-      // TODO check tile entity hitbox for colision.
-        // trigger collision between the two. this-hitting-other.
-    } else {
+      logicContext.levelInstance.getMap().colisionDetection(logicContext, tile, this);
+    } else { // left the game area. Remove.
       this.removeSelf(logicContext);
     }
+  }
+
+  collisionDamage(logicContext: LogicContext): BotDamage {
+    // TODO collisionDamage
+    return null;
+  }
+
+  collisionYouHit(logicContext: LogicContext) {
+    // TODO add explosion? Leave a mark?
+    this.removeSelf(logicContext);
+  }
+
+  collisionYouWereHit(logicContext: LogicContext, hit: BotCollision) {
+    // TODO add explosion? Leave a mark?
+    this.removeSelf(logicContext);
   }
 
   // hook
   removeSelf(logicContext: LogicContext) {
     this.destroy(logicContext);
   }
-
-
 
   move(logicContext: LogicContext) {
     this.bulletDir.update(this.posX, this.posY);

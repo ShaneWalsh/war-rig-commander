@@ -1,14 +1,10 @@
-import { Injectable } from '@angular/core';
 import { BotGoal, BotGoalSimple, LogicScenario, LogicSequence } from '../bot/BotGoal';
 import { MoveToLogic } from '../bot/logic/movement/MoveToLogic';
 import { PatrolLogic } from '../bot/logic/movement/PatrolLogic';
 import { SentryLogic } from '../bot/logic/movement/SentryLogic';
 import { Cords } from '../Cords';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class LogicFactoryService {
+export class LogicFactory {
 
   constructor() { }
 
@@ -21,7 +17,7 @@ export class LogicFactoryService {
   }
 
   public static createSentry():BotGoal {
-    const s = LogicFactoryService.createSentryScenrio();
+    const s = LogicFactory.createSentryScenrio();
     return new BotGoalSimple(s,s);
   }
 
@@ -29,7 +25,7 @@ export class LogicFactoryService {
     let patrol = new PatrolLogic(points);
     let seq = new LogicSequence([patrol]);
     let patrolScen = new LogicScenario(seq,[]);
-    let botGoal = new BotGoalSimple(patrolScen,LogicFactoryService.createSentryScenrio());
+    let botGoal = new BotGoalSimple(patrolScen,LogicFactory.createSentryScenrio());
 
     return botGoal;
   }
@@ -38,7 +34,7 @@ export class LogicFactoryService {
     let move = new MoveToLogic(points);
     let seq = new LogicSequence([move]);
     let moveScen = new LogicScenario(seq,[]);
-    let botGoal = new BotGoalSimple(moveScen,LogicFactoryService.createSentryScenrio());
+    let botGoal = new BotGoalSimple(moveScen,LogicFactory.createSentryScenrio());
 
     return botGoal;
   }

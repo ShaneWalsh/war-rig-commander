@@ -1,7 +1,7 @@
 // TODO Should have access to mouse and keyboard values
 
 import { BotInstance } from "src/app/core/bot/BotInstance";
-import { LogicFactoryService } from "src/app/core/factory/logic-factory.service";
+import { LogicFactory } from "src/app/core/factory/logic-factory";
 import { MapTile } from "src/app/core/map/LevelMap";
 import { TileEntity } from "src/app/core/TileEntity";
 import { CustomKeyboardEvent } from "src/app/services/keyboard-event.service";
@@ -123,7 +123,7 @@ class BotEntitySelectedUiState extends FreeUiState {
   rightClickRelease(rightRelease: MouseEvent): UiLogicState {
     // make the entity move to the point?
     const mapTile = this.mc.levelMS.getCurrentLevel().getMouseMapTile(rightRelease);
-    let moveTo = LogicFactoryService.createMoveTo([mapTile.getCords()]);
+    let moveTo = LogicFactory.createMoveTo([mapTile.getCords()]);
     this._botInstance.forEach(b => b.setGoal(moveTo));
     // hold down shift to start waypointing?
     return this;

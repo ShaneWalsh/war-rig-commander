@@ -6,6 +6,8 @@ import { BotBrain } from "./BotBrains";
 import { BotGoal } from "./BotGoal";
 import { BotPart } from "./BotPart";
 import { BotTeam } from "./BotTeam";
+import { BotCollision } from "./util/BotColision";
+import { BotDamage } from "./util/BotDamage";
 
 /**
  * Default bot
@@ -16,7 +18,7 @@ import { BotTeam } from "./BotTeam";
  *
  *
  */
-export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, TileEntity {
+export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, TileEntity, BotCollision {
   // A turret would implement all 3 for example, and may have multiple weapons.
   private botWeapon:any[] = []; // todo weapons, range, damage, health, amno type etc
   private botBrains:BotBrain[] = []; // anything with logic, rotating, moving
@@ -42,7 +44,22 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
       this.tryConfigValues(["bTimer"]);
   }
   init(logicContext: LogicContext) {}
-  destroy(logicContext: LogicContext) {}
+  destroy(logicContext: LogicContext) {
+    logicContext.levelInstance.mc.displayMS.removeDrawer(this);
+    logicContext.levelInstance.mc.logicMS.removeLogicProcess(this);
+    let tiles = logicContext.levelInstance.getMap().getTiles();
+    tiles[this.tileX][this.tileY].removeTileEntity(); // TODO this does not handle a bot that spans multiple tiles.
+  }
+
+  collisionDamage(logicContext: LogicContext): BotDamage {
+    throw new Error("Method not implemented.");
+  }
+  collisionYouHit(logicContext: LogicContext, hit: BotCollision) {
+    throw new Error("Method not implemented.");
+  }
+  collisionYouWereHit(logicContext: LogicContext, hit: BotCollision) {
+    this.destroy(logicContext);
+  }
 
   update(logicContext: LogicContext) {
     logicContext.setBotInstance(this);
@@ -69,9 +86,11 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   getCenterX():number {
     return this.posX+(16);
   }
+
   getCenterY():number {
     return this.posY+(16);
   }
+
   // TODO how to factor in the tile size?
   getTopLeftTileCenterCords():{x:number,y:number} {
     return {x:this.posX+(16), y:this.posY+(16)};
@@ -80,15 +99,19 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   setGoal(botGoal:BotGoal) {
     this.botGoal = botGoal;
   }
+
   addBrain(botBrain:BotBrain){
     this.botBrains.push(botBrain);
   }
+
   addPart(botPart:BotPart){
     this.botParts.push(botPart);
   }
+
   getBotTeam():BotTeam {
     return this.botTeam;
   }
+
   setBotTeam(botTeam:BotTeam) {
     this.botTeam = botTeam;
   }

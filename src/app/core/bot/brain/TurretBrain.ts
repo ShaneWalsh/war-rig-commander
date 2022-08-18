@@ -1,4 +1,4 @@
-import { BotFactoryService } from "../../factory/bot-factory.service";
+import { BotFactory } from "../../factory/bot-factory";
 import { Limiter } from "../../Limiter";
 import { ManagerContext } from "../../manager/support/ManagerContext";
 import { LogicContext } from "../../manager/support/SharedContext";
@@ -7,6 +7,7 @@ import { BotBrain } from "../BotBrains";
 import { BotInstance } from "../BotInstance";
 import { TargetFinder, TargetVariables } from "./TargetFinder";
 
+// TODO move to Weapon states, not Turret. Turret just turns.
 enum TurretState {
   LOADING="LOADING",
   LOADED="LOADED",
@@ -33,17 +34,16 @@ enum TurretState {
 
   think(logicContext:LogicContext) {
     let {mc, bi} = logicContext.getCommon();
-    // this.firingLimiter =
     let firingLimiter:Limiter = logicContext.getLocalVariableOrExec(this.firingLimiterVarId,() => this.createLimiter())
-    // do I have any nearby targets?
     firingLimiter.update();
     let target = logicContext.getLocalVariableOrDefault(TargetVariables.CURRENT_TARGET,null);
     if(target !== null) {
       // TODO rotate to turret to face the target before firing!
+      // TODO extract to Individual Weapons/Tools.
       if(firingLimiter.atLimit()) { // fire!
         // do we have the ammo to fire?
         // generate bullet
-        BotFactoryService.createMissile(logicContext, bi.posX, bi.posY,target.posX, target.posY);
+        BotFactory.createMissile(logicContext, bi.posX, bi.posY,target.posX, target.posY);
         firingLimiter.reset();
       }
     } else { // TODO then turn the turret to face back to its default rotation position after a time limit...

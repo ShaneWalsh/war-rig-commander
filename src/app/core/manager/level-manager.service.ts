@@ -8,7 +8,7 @@ import { BotTeam, TeamHandler, TeamRelationship } from '../bot/BotTeam';
 import { TargetFinder } from '../bot/brain/TargetFinder';
 import { TurretBrain } from '../bot/brain/TurretBrain';
 import { Cords } from '../Cords';
-import { LogicFactoryService } from '../factory/logic-factory.service';
+import { LogicFactory } from '../factory/logic-factory';
 import { LevelMap } from '../map/LevelMap';
 import { LevelInstance } from './support/level/LevelInstance';
 import { UiLogic } from './support/logic/UiLogic';
@@ -144,7 +144,7 @@ class TestLevel extends LevelInstance {
 
     // create all of the buildings and units etc
     // patrolling unit
-    let patrol = LogicFactoryService.createPatrol([new Cords(9,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
+    let patrol = LogicFactory.createPatrol([new Cords(9,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
     let bi = new BotInstance({},2,3,1,1,2*32,3*32);
     bi.setGoal(patrol);
     bi.setBotTeam(btGood);
@@ -164,7 +164,7 @@ class TestLevel extends LevelInstance {
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,23).setTileEntity(bi);
 
-    let moveTo = LogicFactoryService.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
+    let moveTo = LogicFactory.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
     bi = new BotInstance({},5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);
     bi.setBotTeam(btBad);

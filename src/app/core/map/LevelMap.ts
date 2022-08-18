@@ -1,4 +1,5 @@
 import { LogicService } from 'src/app/services/logic.service';
+import { BotMissile } from '../bot/BotMissile';
 import { Cords } from '../Cords';
 import { Drawer } from '../manager/support/display/Drawer';
 import { UiSettings } from '../manager/support/display/UiSettings';
@@ -100,9 +101,7 @@ export class LevelMap implements Drawer, LogicProcess {
   }
 
   /**
-   * Are the provided cords on the map somewhere?
-   * @param posX
-   * @param posY
+   * Are the provided cords on the map somewhere? If so return the Tile underneath.
    */
   locateTile(posX: number, posY: number) : MapTile{
     let tileX = Math.floor(posX/this.tileSize);
@@ -112,6 +111,21 @@ export class LevelMap implements Drawer, LogicProcess {
     }
     return null;
   }
+
+  /**
+   * Has this entity hit anything on this tile?
+   * Overkill maybe for a method, but adds enterception point for the future.
+   */
+  colisionDetection(logicContext: LogicContext, tile:MapTile, missile: BotMissile) {
+    let entityOpt = tile.optTileEntity();
+    if(entityOpt.isPresent()) {
+      const entity = entityOpt.get();
+      // TODO pixel colision detection logic, but perhaps the game is underpressure and drops to simple colision logic??? So maintain this logic also, add toggle.
+      missile.collisionYouHit(logicContext, entity);
+      entity.collisionYouWereHit(logicContext, missile);
+    }
+  }
+
 }
 
 export class MapTile {
