@@ -13,7 +13,7 @@ export class BotFactory {
 
   // Generic bullet for testing.
   public static createMissile(logicContext: LogicContext,x:number,y:number,tarX:number,tarY:number): Missile {
-    let bd = BulletDirection.calculateBulletDirection(x,y,tarX,tarY,50,false,null);
+    let bd = BulletDirection.calculateBulletDirection(x,y,tarX,tarY,4,false,null);
     let missile = new Missile(x, y, 8, 8, bd);
     missile.init(logicContext);
     console.log("Create Missile", missile)
@@ -77,8 +77,8 @@ class Missile implements LogicProcess, Drawer, BotMissile {
 
   move(logicContext: LogicContext) {
     this.bulletDir.update(this.posX, this.posY);
-    this.posX += this.bulletDir.directionX;
-    this.posY += this.bulletDir.directionY;
+    this.posX += this.bulletDir.directionX*this.bulletDir.speed;
+    this.posY += this.bulletDir.directionY*this.bulletDir.speed;
   }
 
   destroy(logicContext: LogicContext) {
