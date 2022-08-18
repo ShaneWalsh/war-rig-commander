@@ -5,6 +5,7 @@ import { CanvasContainer } from "./display/CanvasContainer";
 import { LevelInstance } from "./level/LevelInstance";
 import { UiSettings } from "./display/UiSettings";
 import { LogicBlock } from "../../bot/logic/LogicBlock";
+import { ManagerContext } from "./ManagerContext";
 
 export class SharedContext {
   tileEntity:TileEntity = null;
@@ -40,6 +41,13 @@ export class LogicContext extends SharedContext {
 
   constructor(public levelInstance:LevelInstance){
     super();
+  }
+
+  getCommon():{mc:ManagerContext,bi:BotInstance}{
+    return {
+      mc:this.levelInstance.mc,
+      bi:this.botInstance
+    }
   }
 
   /**

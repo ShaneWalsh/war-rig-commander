@@ -5,6 +5,7 @@ export interface LogicProcess {
 
   /**
    * Setup up anything logic process requires.
+   * Create Subscriptions
    */
   init(logicContext:LogicContext);
 
@@ -15,6 +16,7 @@ export interface LogicProcess {
 
   /**
    * Clean up after logic process is removed from the engine
+   * Cancel Subscriptions
    */
   destroy(logicContext:LogicContext);
 }

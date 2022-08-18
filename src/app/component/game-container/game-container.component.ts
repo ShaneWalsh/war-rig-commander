@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DisplayManagerService } from 'src/app/core/manager/display-manager.service';
+import { EventManagerService } from 'src/app/core/manager/event-manager.service';
 import { LevelManagerService } from 'src/app/core/manager/level-manager.service';
 import { LogicManagerService } from 'src/app/core/manager/logic-manager.service';
 import { ManagerContext } from 'src/app/core/manager/support/ManagerContext';
@@ -31,13 +32,13 @@ export class GameContainerComponent implements OnInit, OnDestroy {
 
     @Input() public requestAnimFrame: any;
 
-    constructor(private levelManagerService:LevelManagerService, private logicManagerService:LogicManagerService, private displayManagerService:DisplayManagerService, private keyboardEventService:KeyboardEventService) {
+    constructor(private levelManagerService:LevelManagerService, private logicManagerService:LogicManagerService, private displayManagerService:DisplayManagerService, private keyboardEventService:KeyboardEventService,private eventManagerService:EventManagerService) {
       this.subs.push(this.levelManagerService.getGameTickSubject().subscribe(result => {
         if(this.tickComplete){
             this.update();
         }
       }));
-      this.managerContext = new ManagerContext(levelManagerService,logicManagerService,displayManagerService,keyboardEventService);
+      this.managerContext = new ManagerContext(levelManagerService,logicManagerService,displayManagerService,keyboardEventService,eventManagerService);
 
       // ###########################################################################################################################################
       // ########################################### TEMPORARY TEST LOGIC ##########################################################################

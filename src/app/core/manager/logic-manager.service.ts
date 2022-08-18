@@ -29,7 +29,8 @@ export class LogicManagerService {
 
   public update(levelInstance:LevelInstance) {
     this.logicContext.setPathfinderService(this.pathfinderService);
-    this.logicProcesses.forEach( logicProcess => {
+    const processes = [...this.logicProcesses]; // TODO performance analysis? Issue is how to remove processes that end without affecting the loop. Destroyed or consumed?
+    processes.forEach( logicProcess => {
       logicProcess.update(this.logicContext);
     });
   }
@@ -51,7 +52,19 @@ export class LogicManagerService {
   }
 
   public removeLogicProcess(logicProcess:LogicProcess) {
-    this.logicProcesses.splice(this.logicProcesses.indexOf(logicProcess));
+    const index = this.logicProcesses.indexOf(logicProcess);
+    if(index > -1){
+      this.logicProcesses.splice(this.logicProcesses.indexOf(logicProcess));
+    }
+  }
+
+  /**
+   * Called by a running process, will be removed after all processes are finished.
+   * TODO determine if this is required?
+   * @param logicProcess
+   */
+  public safelyRemoveLogicProcess(logicProcess:LogicProcess) {
+    // TODO logic
   }
 
   // #################

@@ -1,8 +1,10 @@
+import { BotFactoryService } from "../../factory/bot-factory.service";
 import { Limiter } from "../../Limiter";
 import { ManagerContext } from "../../manager/support/ManagerContext";
 import { LogicContext } from "../../manager/support/SharedContext";
 import { TileEntity } from "../../TileEntity";
 import { BotBrain } from "../BotBrains";
+import { BotInstance } from "../BotInstance";
 import { TargetFinder, TargetVariables } from "./TargetFinder";
 
 enum TurretState {
@@ -28,7 +30,7 @@ enum TurretState {
   }
 
   think(logicContext:LogicContext) {
-    let mc = logicContext.levelInstance.mc;
+    let {mc, bi} = logicContext.getCommon();
     // do I have any nearby targets?
     this.firingLimiter.update();
     let target = logicContext.getLocalVariableOrDefault(TargetVariables.CURRENT_TARGET,null);
@@ -37,9 +39,10 @@ enum TurretState {
       if(this.firingLimiter.atLimit()) { // fire!
         // do we have the ammo to fire?
         // generate bullet
+        BotFactoryService.createMissile(logicContext, bi.posX, bi.posY,target.posX, target.posY);
         this.firingLimiter.reset();
       }
-    } else { // TODO then turn the turret to face back to its default rotation position.
+    } else { // TODO then turn the turret to face back to its default rotation position after a time limit...
 
     }
 

@@ -6,6 +6,7 @@ import { BotInstance } from '../bot/BotInstance';
 import { DrawTestBotPart } from '../bot/BotPart';
 import { BotTeam, TeamHandler, TeamRelationship } from '../bot/BotTeam';
 import { TargetFinder } from '../bot/brain/TargetFinder';
+import { TurretBrain } from '../bot/brain/TurretBrain';
 import { Cords } from '../Cords';
 import { LogicFactoryService } from '../factory/logic-factory.service';
 import { LevelMap } from '../map/LevelMap';
@@ -118,6 +119,7 @@ class TestLevel extends LevelInstance {
   public initLevel() {
 
     let targetFinder = new TargetFinder(5);
+    let turretBrain = new TurretBrain(5,'todo amno','todo config');
 
     // level context, which in this case is
     // 2d map tiles
@@ -147,6 +149,7 @@ class TestLevel extends LevelInstance {
     bi.setGoal(patrol);
     bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,3).setTileEntity(bi);
@@ -156,6 +159,7 @@ class TestLevel extends LevelInstance {
     bi.setGoal(patrol);
     bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,23).setTileEntity(bi);
@@ -165,6 +169,7 @@ class TestLevel extends LevelInstance {
     bi.setGoal(moveTo);
     bi.setBotTeam(btBad);
     bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(5,33).setTileEntity(bi);
