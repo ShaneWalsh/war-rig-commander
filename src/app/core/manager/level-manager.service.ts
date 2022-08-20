@@ -164,6 +164,31 @@ class TestLevel extends LevelInstance {
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(2,23).setTileEntity(bi);
 
+    bi = new BotInstance({},2,24,1,1,2*32,23*32);
+    bi.setGoal(patrol);
+    bi.setBotTeam(btGood);
+    bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
+    bi.addPart(new DrawTestBotPart());
+    this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(2,24).setTileEntity(bi);
+    bi = new BotInstance({},3,25,1,1,2*32,23*32);
+    bi.setGoal(patrol);
+    bi.setBotTeam(btGood);
+    bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
+    bi.addPart(new DrawTestBotPart());
+    this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(3,25).setTileEntity(bi);
+    bi = new BotInstance({},4,27,1,1,2*32,23*32);
+    bi.setGoal(patrol);
+    bi.setBotTeam(btGood);
+    bi.addBrain(targetFinder);
+    bi.addBrain(turretBrain);
+    bi.addPart(new DrawTestBotPart());
+    this.mc.logicMS.addLogicProcess(bi);
+    this.getMap().get(4,27).setTileEntity(bi);
+
     let moveTo = LogicFactory.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
     bi = new BotInstance({},5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);

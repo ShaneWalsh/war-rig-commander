@@ -183,7 +183,7 @@ export class LogicService {
    * @param increment the amount to increment on each loop
    * @returns
    */
-   static incrementLoop(index: number, length: number, increment:number=1): number {
+  static incrementLoop(index: number, length: number, increment:number=1): number {
     index = index+increment;
     return (index >= length)?0:index;
   }

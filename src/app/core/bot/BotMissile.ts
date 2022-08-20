@@ -1,5 +1,5 @@
 import { LogicContext } from "../manager/support/SharedContext"
-import { BotCollision } from "./util/BotColision";
+import { BotCollision } from "./util/BotCollision";
 
 export interface BotMissile extends BotCollision {
 

@@ -6,7 +6,7 @@ import { BotBrain } from "./BotBrains";
 import { BotGoal } from "./BotGoal";
 import { BotPart } from "./BotPart";
 import { BotTeam } from "./BotTeam";
-import { BotCollision } from "./util/BotColision";
+import { BotCollision } from "./util/BotCollision";
 import { BotDamage } from "./util/BotDamage";
 
 /**
@@ -29,7 +29,7 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   // speed?
 
   constructor(
-      public config:any={}, // override defaults
+      config:any={}, // override defaults
       tileX:number, // which tile the bot is on (the top left one anyway)
       tileY:number,
       tileSizeX:number, // how many tiles the bot occupies in the x direction
@@ -40,10 +40,11 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
       // alignment? faction? player controlled?
       // group, e.g if you fire on one bot in a convoy, they will all know, and react.
     ) {
-      super(tileX,tileY,tileSizeX,tileSizeY);
+      super(config,tileX,tileY,tileSizeX,tileSizeY);
       this.tryConfigValues(["bTimer"]);
   }
   init(logicContext: LogicContext) {}
+
   destroy(logicContext: LogicContext) {
     logicContext.levelInstance.mc.displayMS.removeDrawer(this);
     logicContext.levelInstance.mc.logicMS.removeLogicProcess(this);
@@ -118,14 +119,6 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
 
   getSpeed():number {
     return 4;
-  }
-
-  tryConfigValues(params){
-    for(let param of params){
-      if(this.config[param]){
-        this[param] = this.config[param];
-      }
-    }
   }
 }
 

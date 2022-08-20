@@ -1,7 +1,7 @@
 import { LogicService } from 'src/app/services/logic.service';
 import { BotMissile } from '../bot/BotMissile';
 import { BulletDirection } from '../bot/rotation/BulletDirection';
-import { BotCollision } from '../bot/util/BotColision';
+import { BotCollision } from '../bot/util/BotCollision';
 import { BotDamage } from '../bot/util/BotDamage';
 import { Drawer } from '../manager/support/display/Drawer';
 import { LogicProcess } from '../manager/support/logic/LogicProcess';

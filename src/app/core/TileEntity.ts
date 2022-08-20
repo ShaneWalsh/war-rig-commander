@@ -43,6 +43,7 @@ export abstract class AbsTileEntity implements TileEntity {
   private logicVariables:Map<string,any> = new Map();
 
   constructor(
+    public config:any,
     public tileX:number, // which tile the bot is on (the top left one anyway)
     public tileY:number,
     public tileSizeX:number, // how many tiles the bot occupies in the x direction
@@ -91,6 +92,14 @@ export abstract class AbsTileEntity implements TileEntity {
 
   getLogicVariables(): Map<string, any> {
     return this.logicVariables;
+  }
+
+  tryConfigValues(params){
+    for(let param of params){
+      if(this.config[param]){
+        this[param] = this.config[param];
+      }
+    }
   }
 
   abstract draw(drawingContext: DrawingContext);
