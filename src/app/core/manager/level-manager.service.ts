@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { SpawnBuilding } from 'src/app/impl/extractor/bot/SpawnBuilding';
 import { MouseService } from 'src/app/services/mouse.service';
 import { KeyboardEventService } from '../../services/keyboard-event.service';
 import { BotInstance } from '../bot/BotInstance';
@@ -13,6 +14,7 @@ import { LevelMap } from '../map/LevelMap';
 import { LevelInstance } from './support/level/LevelInstance';
 import { UiLogic } from './support/logic/UiLogic';
 import { ManagerContext } from './support/ManagerContext';
+import { LogicContext } from './support/SharedContext';
 
 @Injectable({
   providedIn: 'root'
@@ -198,6 +200,20 @@ class TestLevel extends LevelInstance {
     bi.addPart(new DrawTestBotPart());
     this.mc.logicMS.addLogicProcess(bi);
     this.getMap().get(5,33).setTileEntity(bi);
+
+    // Building
+    let building = new SpawnBuilding({},20,20,2,2,20*32,20*32,btBad,(lc:LogicContext,cords:Cords) => {
+      let moveTo = LogicFactory.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
+      bi = new BotInstance({},cords.x,cords.y,1,1,cords.x*32,cords.y*32);
+      bi.setGoal(moveTo);
+      bi.setBotTeam(btBad);
+      bi.addBrain(targetFinder);
+      bi.addBrain(turretBrain);
+      bi.addPart(new DrawTestBotPart());
+      return bi;
+    },30,null);
+    this.mc.logicMS.addLogicProcess(building);
+    this.mc.displayMS.addDrawer(building);
 
     // create the resources tracker
 

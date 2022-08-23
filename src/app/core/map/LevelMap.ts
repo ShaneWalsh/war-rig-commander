@@ -20,9 +20,9 @@ export class LevelMap implements Drawer, LogicProcess {
 
     let randomness = Math.floor(Math.random() * 10 + 1);
     let randomnessCounter = 0;
-    for (let i = 4; i < this.mapSizeX; i++) {
+    for (let i = 0; i < this.mapSizeX; i++) {
       this.map[i] = new Array();
-      for (let j = 4; j < this.mapSizeY; j++) {
+      for (let j = 0; j < this.mapSizeY; j++) {
         randomnessCounter++;
         if (randomnessCounter >= randomness) {
           this.map[i][j] = new MapTile(this, i, j, '#00FFFF', false);
