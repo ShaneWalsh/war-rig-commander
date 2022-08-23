@@ -43,10 +43,11 @@ export class LogicContext extends SharedContext {
     super();
   }
 
-  getCommon():{mc:ManagerContext,bi:BotInstance}{
+  getCommon():{mc:ManagerContext,bi:BotInstance,uiSet:UiSettings}{
     return {
       mc:this.levelInstance.mc,
-      bi:this.botInstance
+      bi:this.botInstance,
+      uiSet:this.levelInstance.mc.displayMS.getUiSettings()
     }
   }
 

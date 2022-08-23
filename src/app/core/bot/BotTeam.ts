@@ -4,6 +4,11 @@ export enum TeamRelationship {
   NEUTRAL="NEUTRAL", // default if no relationship is estabilished.
   ENEMIES="ENEMIES"
 }
+
+export interface HasTeam {
+  getBotTeam():BotTeam;
+}
+
 /**
  * A bot team tells which team this bot is associated with.
  * Teams can be allied with other teams, Neutral or at ENEMIES.

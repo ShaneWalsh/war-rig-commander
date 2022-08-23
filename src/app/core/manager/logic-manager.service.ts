@@ -39,8 +39,9 @@ export class LogicManagerService {
   // #### GET SET ####
   // #################
 
-  public createContextForLevel(levelInstance){
+  public createContextForLevel(levelInstance:LevelInstance){
     this.logicContext = new LogicContext(levelInstance);
+    levelInstance.initLevel(this.logicContext);
   }
 
   public setLogicProcesses(logicProcesses:LogicProcess[]){

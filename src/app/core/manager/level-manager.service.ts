@@ -118,7 +118,7 @@ class TestLevel extends LevelInstance {
     super(mc);
   }
 
-  public initLevel() {
+  public initLevel(logicContext:LogicContext) {
 
     let targetFinder = new TargetFinder(5);
     let turretBrain = new TurretBrain(50,'todo amno','todo config');
@@ -147,74 +147,61 @@ class TestLevel extends LevelInstance {
     // create all of the buildings and units etc
     // patrolling unit
     let patrol = LogicFactory.createPatrol([new Cords(9,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
-    let bi = new BotInstance({},2,3,1,1,2*32,3*32);
+    let bi = new BotInstance({},btGood,2,3,1,1,2*32,3*32);
     bi.setGoal(patrol);
-    bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(2,3).setTileEntity(bi);
+    bi.init(logicContext);
 
     // patrol = LogicFactoryService.makePatrol([{x:9,y:4}, {x:13,y:3}, {x:16,y:17},{x:5,y:17}]);
-    bi = new BotInstance({},2,23,1,1,2*32,23*32);
+    bi = new BotInstance({},btGood,2,23,1,1,2*32,23*32);
     bi.setGoal(patrol);
-    bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(2,23).setTileEntity(bi);
+    bi.init(logicContext);
 
-    bi = new BotInstance({},2,24,1,1,2*32,23*32);
+    bi = new BotInstance({},btGood, 2,24,1,1,2*32,23*32);
     bi.setGoal(patrol);
-    bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(2,24).setTileEntity(bi);
-    bi = new BotInstance({},3,25,1,1,2*32,23*32);
+    bi.init(logicContext);
+
+    bi = new BotInstance({},btGood, 3,25,1,1,2*32,23*32);
     bi.setGoal(patrol);
-    bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(3,25).setTileEntity(bi);
-    bi = new BotInstance({},4,27,1,1,2*32,23*32);
+    bi.init(logicContext);
+
+    bi = new BotInstance({},btGood, 4,27,1,1,2*32,23*32);
     bi.setGoal(patrol);
-    bi.setBotTeam(btGood);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(4,27).setTileEntity(bi);
+    bi.init(logicContext);
 
     let moveTo = LogicFactory.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
-    bi = new BotInstance({},5,33,1,1,5*32,33*32);
+    bi = new BotInstance({},btBad, 5,33,1,1,5*32,33*32);
     bi.setGoal(moveTo);
-    bi.setBotTeam(btBad);
     bi.addBrain(targetFinder);
     bi.addBrain(turretBrain);
     bi.addPart(new DrawTestBotPart());
-    this.mc.logicMS.addLogicProcess(bi);
-    this.getMap().get(5,33).setTileEntity(bi);
+    bi.init(logicContext);
 
     // Building
-    let building = new SpawnBuilding({},20,20,2,2,20*32,20*32,btBad,(lc:LogicContext,cords:Cords) => {
+    let building = new SpawnBuilding({},btBad,20,20,2,2,20*32,20*32,(lc:LogicContext,cords:Cords) => {
       let moveTo = LogicFactory.createMoveTo([new Cords(39,4), new Cords(13,3), new Cords(16,17),new Cords(5,17)]);
-      bi = new BotInstance({},cords.x,cords.y,1,1,cords.x*32,cords.y*32);
+      bi = new BotInstance({},btBad, cords.x,cords.y,1,1,cords.x*32,cords.y*32);
       bi.setGoal(moveTo);
-      bi.setBotTeam(btBad);
       bi.addBrain(targetFinder);
-      bi.addBrain(turretBrain);
+      //bi.addBrain(turretBrain);
       bi.addPart(new DrawTestBotPart());
       return bi;
     },30,null);
-    this.mc.logicMS.addLogicProcess(building);
-    this.mc.displayMS.addDrawer(building);
-
+    building.init(logicContext);
     // create the resources tracker
 
     // create the gui

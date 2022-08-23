@@ -32,24 +32,25 @@ enum TurretState {
        this.firingLimiterVarId = this.id +'-firingLimiter';
       }
 
-  think(logicContext:LogicContext) {
-    let {mc, bi} = logicContext.getCommon();
-    let firingLimiter:Limiter = logicContext.getLocalVariableOrExec(this.firingLimiterVarId,() => this.createLimiter())
+  think(lc:LogicContext) {
+    let {mc, bi, uiSet} = lc.getCommon();
+    let firingLimiter:Limiter = lc.getLocalVariableOrExec(this.firingLimiterVarId,() => this.createLimiter())
     firingLimiter.update();
-    let target = logicContext.getLocalVariableOrDefault(TargetVariables.CURRENT_TARGET,null);
+    let target = lc.getLocalVariableOrDefault(TargetVariables.CURRENT_TARGET,null);
     if(target !== null) {
       // TODO rotate to turret to face the target before firing!
       // TODO extract to Individual Weapons/Tools.
       if(firingLimiter.atLimit()) { // fire!
         // do we have the ammo to fire?
         // generate bullet
-        BotFactory.createMissile(logicContext, bi.posX, bi.posY,target.posX, target.posY);
+        let tarCords = target.getCenterCords(uiSet);
+        BotFactory.createMissile(lc,bi.getBotTeam(), bi.posX, bi.posY,tarCords.x, tarCords.y);
         firingLimiter.reset();
       }
     } else { // TODO then turn the turret to face back to its default rotation position after a time limit...
 
     }
-    logicContext.setLocalVariable(this.firingLimiterVarId, firingLimiter);
+    lc.setLocalVariable(this.firingLimiterVarId, firingLimiter);
   }
 
   createLimiter(){

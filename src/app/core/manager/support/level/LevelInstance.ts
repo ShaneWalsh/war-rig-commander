@@ -1,15 +1,16 @@
-import { TeamHandler } from "src/app/core/bot/BotTeam";
+import { BotTeam, TeamHandler, TeamRelationship } from "src/app/core/bot/BotTeam";
 import { CustomKeyboardEvent } from "src/app/services/keyboard-event.service";
 import { LevelMap, MapTile } from "../../../map/LevelMap";
 import { UiLogic } from "../logic/UiLogic";
 import { ManagerContext } from "../ManagerContext";
+import { LogicContext } from "../SharedContext";
 
 export abstract class LevelInstance {
   constructor(public mc:ManagerContext) {
-    this.initLevel();
+
   }
 
-  public abstract initLevel();
+  public abstract initLevel(logicContext:LogicContext);
   public abstract getMap():LevelMap;
   public abstract getTeamHandler():TeamHandler;
   public abstract getUiLogic():UiLogic;
@@ -35,6 +36,10 @@ export abstract class LevelInstance {
   }
   public processKeyDown(customKeyboardEvent: CustomKeyboardEvent){
     this.getUiLogic().keyDown(customKeyboardEvent);
+  }
+
+  public isEnemy(bt1:BotTeam, bt2:BotTeam):boolean {
+    return this.getTeamHandler().getRelationship(bt1,bt2) === TeamRelationship.ENEMIES;
   }
 }
 

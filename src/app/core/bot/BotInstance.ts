@@ -1,6 +1,7 @@
 import { Drawer } from "../manager/support/display/Drawer";
 import { LogicProcess } from "../manager/support/logic/LogicProcess";
 import { DrawingContext, LogicContext } from "../manager/support/SharedContext";
+import { LevelMap } from "../map/LevelMap";
 import { AbsTileEntity, TileEntity } from "../TileEntity";
 import { BotBrain } from "./BotBrains";
 import { BotGoal } from "./BotGoal";
@@ -25,11 +26,11 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
   private botParts:BotPart[] = []; // anything that draws on the bot.
 
   private botGoal:BotGoal; //primary brain for moving, deciding where to go, what to do. Not Sensos or guns etc
-  private botTeam:BotTeam = new BotTeam("DEFAULT", false);
   // speed?
 
   constructor(
       config:any={}, // override defaults
+      botTeam:BotTeam,
       tileX:number, // which tile the bot is on (the top left one anyway)
       tileY:number,
       tileSizeX:number, // how many tiles the bot occupies in the x direction
@@ -40,16 +41,20 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
       // alignment? faction? player controlled?
       // group, e.g if you fire on one bot in a convoy, they will all know, and react.
     ) {
-      super(config,tileX,tileY,tileSizeX,tileSizeY);
+      super(config,botTeam,tileX,tileY,tileSizeX,tileSizeY);
       this.tryConfigValues(["bTimer"]);
   }
-  init(logicContext: LogicContext) {}
+
+  init(lc: LogicContext) {
+    lc.levelInstance.mc.displayMS.addDrawer(this);
+    lc.levelInstance.mc.logicMS.addLogicProcess(this);
+    this.placeOnMap(lc.levelInstance.getMap());
+  }
 
   destroy(logicContext: LogicContext) {
     logicContext.levelInstance.mc.displayMS.removeDrawer(this);
     logicContext.levelInstance.mc.logicMS.removeLogicProcess(this);
-    let tiles = logicContext.levelInstance.getMap().getTiles();
-    tiles[this.tileX][this.tileY].removeTileEntity(); // TODO this does not handle a bot that spans multiple tiles.
+    this.removeFromMap(logicContext.levelInstance.getMap());
   }
 
   collisionDamage(logicContext: LogicContext): BotDamage {
@@ -107,10 +112,6 @@ export class BotInstance extends AbsTileEntity implements Drawer, LogicProcess, 
 
   addPart(botPart:BotPart){
     this.botParts.push(botPart);
-  }
-
-  getBotTeam():BotTeam {
-    return this.botTeam;
   }
 
   setBotTeam(botTeam:BotTeam) {

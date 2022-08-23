@@ -1,5 +1,6 @@
 import { LogicService } from 'src/app/services/logic.service';
 import { BotMissile } from '../bot/BotMissile';
+import { BotTeam } from '../bot/BotTeam';
 import { BulletDirection } from '../bot/rotation/BulletDirection';
 import { BotCollision } from '../bot/util/BotCollision';
 import { BotDamage } from '../bot/util/BotDamage';
@@ -12,9 +13,9 @@ export class BotFactory {
   constructor() {}
 
   // Generic bullet for testing.
-  public static createMissile(logicContext: LogicContext,x:number,y:number,tarX:number,tarY:number): Missile {
+  public static createMissile(logicContext: LogicContext,bt:BotTeam, x:number,y:number,tarX:number,tarY:number): Missile {
     let bd = BulletDirection.calculateBulletDirection(x,y,tarX,tarY,4,false,null);
-    let missile = new Missile(x, y, 8, 8, bd);
+    let missile = new Missile(bt, x, y, 8, 8, bd);
     missile.init(logicContext);
     console.log("Create Missile", missile)
     return missile;
@@ -23,6 +24,7 @@ export class BotFactory {
 
 class Missile implements LogicProcess, Drawer, BotMissile {
   constructor(
+    public bt: BotTeam,
     public posX: number,
     public posY: number,
     public sizeX: number,
@@ -84,5 +86,9 @@ class Missile implements LogicProcess, Drawer, BotMissile {
   destroy(logicContext: LogicContext) {
     logicContext.levelInstance.mc.displayMS.removeDrawer(this);
     logicContext.levelInstance.mc.logicMS.removeLogicProcess(this);
+  }
+
+  getBotTeam():BotTeam {
+    return this.bt;
   }
 }

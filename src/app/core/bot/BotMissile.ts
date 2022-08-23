@@ -1,4 +1,5 @@
 import { LogicContext } from "../manager/support/SharedContext"
+import { BotTeam } from "./BotTeam";
 import { BotCollision } from "./util/BotCollision";
 
 export interface BotMissile extends BotCollision {
@@ -19,5 +20,7 @@ export interface BotMissile extends BotCollision {
    */
   removeSelf(logicContext: LogicContext);
 
+  // Who was the original team for this missile.
+  getBotTeam():BotTeam;
 
 }
