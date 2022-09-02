@@ -8,21 +8,22 @@ export class PathfinderService {
 
   constructor() { }
 
-  // todo for multi sized bots that take more than one tile, I just need to change the isPassalbe call in the logic, to check all of the 4 squares, not just the top left,
+  // todo for multi sized bots that take more than one tile, I just need to change the isPassable call in the logic, to check all of the 4 squares, not just the top left,
   // if any of them are impassiable, then its a failure for that top left calculation isn't it.
 
   /**
    * Extracted from a former project from nearly 10 years ago
    * Needs Heavy refactoring.
-   * Works for a single tile size element, not larger elements.
+   * Works for a single tile size element, not larger elements. Yet.
    * @param x starting x
    * @param y starting y
    * @param xx target x
    * @param yy target y
    * @param originalMap
+   * @param checkTileEntity indicates if the passable function should include tile entities as blocking elements.
    * @returns
    */
-  public static getSinglePath (x,y, xx,yy, originalMap:LevelMap):MoveNode[] {
+  public static getSinglePath (x,y, xx,yy, originalMap:LevelMap, checkTileEntity:boolean = false):MoveNode[] {
     // use A* to find the shortest path, return an array of nodes to move to
     var n = 0;
     var disx = this.positiveDifference(x,xx);
@@ -39,7 +40,8 @@ export class PathfinderService {
     // function to check for passability
     let checkPosition = (posX,posY) => {
       let m = originalMap.get(posX,posY);
-      if( m != null && m.passable && map[posX][posY].maped === false){ // floor or door? and it has not been maped yet
+      if( m != null && m.passable && map[posX][posY].maped === false
+        && (checkTileEntity === false || !m.optTileEntity().isPresent())){ // floor or door? and it has not been maped yet
         disx = this.positiveDifference(posX,xx); 	// this will make sure the difference is a positive, or a zero :/
         disy = this.positiveDifference(posY,yy);
         var node = new MoveNode(posX,posY,n,(disx + disy + n));//create a new node, set values
@@ -126,7 +128,7 @@ export class PathfinderService {
   }
 }
 
-class MoveNode {
+export class MoveNode {
   constructor(
     public x,
     public y,

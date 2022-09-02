@@ -99,6 +99,12 @@ export class LevelMap implements Drawer, LogicProcess {
   getHalfTileSize(): number {
     return this.halfTileSize;
   }
+  getMapSize(): {mapSizeX:number, mapSizeY:number} {
+    return {
+      mapSizeX:this.mapSizeX,
+      mapSizeY:this.mapSizeY
+    };
+  }
 
   /**
    * Are the provided cords on the map somewhere? If so return the Tile underneath.
