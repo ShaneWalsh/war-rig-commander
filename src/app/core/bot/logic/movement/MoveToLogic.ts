@@ -13,11 +13,11 @@ import { WaitLogic } from "../utility/WaitLogic";
 
 
 export class MoveToLogic extends AbstractLogicBlock {
-  firstLoad(logicContext: LogicContext) {
-    this.calcPath(logicContext);
+  firstLoad(lc: LogicContext) {
+    this.calcPath(lc, this.points);
   }
-  reload(logicContext: LogicContext) {
-    this.calcPath(logicContext);
+  reload(lc: LogicContext) {
+    this.calcPath(lc, this.points);
   }
 
   protected currentPointVarId = this.logicId+'-currentPoint';
@@ -29,19 +29,19 @@ export class MoveToLogic extends AbstractLogicBlock {
     super(LogicCode);
   }
 
-  updateLogic(logicContext:LogicContext) {
+  updateLogic(lc:LogicContext) {
     // if the point has changed, change the turn direction.
-    let pathOpt = logicContext.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
-    this.updatePath(logicContext,pathOpt);
+    let pathOpt = lc.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
+    this.updatePath(lc,pathOpt);
   }
 
-  updatePath(logicContext:LogicContext, pathOpt:Opt) {
+  updatePath(lc:LogicContext, pathOpt:Opt) {
     if(pathOpt.isPresent()) {
       let path = pathOpt.get();
-      let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
+      let currentPoint = lc.getLocalVariableOrDefault(this.currentPointVarId,0);
       let nextPoint = path[currentPoint];
-      const botInstance = logicContext.getBotInstance();
-      const li = logicContext.levelInstance;
+      const botInstance = lc.getBotInstance();
+      const li = lc.levelInstance;
 
       // am I at the current tile?
         // loop is done, if not looping, move to center
@@ -49,24 +49,24 @@ export class MoveToLogic extends AbstractLogicBlock {
       if(botInstance.tileX == nextPoint.x && botInstance.tileY == nextPoint.y) {
         currentPoint = LogicService.incrementLoop(currentPoint, path.length);
         if(currentPoint == 0 && !this.loopPath) { // we are done, we have gone to the end of the path.
-          this.moveToCenter(logicContext, botInstance, li.getMap().get(nextPoint.x,nextPoint.y)); // lets try and center in the tile
+          this.moveToCenter(lc, botInstance, li.getMap().get(nextPoint.x,nextPoint.y)); // lets try and center in the tile
           return;
         }
         nextPoint = path[currentPoint];
         if(nextPoint == null) {
           console.log("Why is this null!"); // TODO handle this correctly, how to push this up the line?
-          this.complete(logicContext);
+          this.complete(lc);
           return;
         }
-        logicContext.setLocalVariable(this.currentPointVarId,currentPoint);
-        logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(botInstance.getTileCords(),nextPoint));
-        logicContext.removeLocalVariable(this.moveDirectionVarId);
+        lc.setLocalVariable(this.currentPointVarId,currentPoint);
+        lc.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(botInstance.getTileCords(),nextPoint));
+        lc.removeLocalVariable(this.moveDirectionVarId);
       }
 
       let nextTile:MapTile = li.getMap().get(nextPoint.x,nextPoint.y);
 
-      this.checkTraversal(logicContext, botInstance, nextTile.getTraverseStatus(),li);
-      if ( this.canContinue(logicContext) && this.getStatus(logicContext) === LogicBlockStatus.INPROGRESS ) { // may have been blocked
+      this.checkTraversal(lc, botInstance, nextTile.getTraverseStatus(),li);
+      if ( this.canContinue(lc) && this.getStatus(lc) === LogicBlockStatus.INPROGRESS ) { // may have been blocked
         // TODO can I move into the target tile?
           // Something may have changed since the path was chosen, perhaps, its now blocked.
             // IF blocked, pathfind again? but not if its going to move out of my way?
@@ -77,7 +77,7 @@ export class MoveToLogic extends AbstractLogicBlock {
                   // then I should move around it, if I can. or turn around,
                   // or just stop, 'say path is blocked here sir'.
 
-        let moveDirection:TurretDirection = this.getOrCreateTurret(logicContext,botInstance, nextTile);
+        let moveDirection:TurretDirection = this.getOrCreateTurret(lc,botInstance, nextTile);
         moveDirection.update(botInstance.getCenterX(),botInstance.getCenterY());
 
         // TODO facing, the right way, then rotate before moving?
@@ -106,31 +106,29 @@ export class MoveToLogic extends AbstractLogicBlock {
       }
     } else { // we have no path for whatever reason, so return.
       if(ConfigService.isDebugLogic) console.log("We have no path for whatever reason, completing move to logic");
-      this.complete(logicContext);
+      this.complete(lc);
     }
-    //console.log("ID:"+this.logicId + " Complete:" +this.isComplete(logicContext) + " Status:"+this.getStatus(logicContext));
+    //console.log("ID:"+this.logicId + " Complete:" +this.isComplete(lc) + " Status:"+this.getStatus(lc));
   }
 
-  private checkTraversal(logicContext:LogicContext, bi:BotInstance, traverseStatus: TraverseStatus, li:LevelInstance) {
+  protected checkTraversal(lc:LogicContext, bi:BotInstance, traverseStatus: TraverseStatus, li:LevelInstance) {
     if(!traverseStatus.passable) { // hmmm, then we are completely blocked.
-      this.blocked(logicContext);
-      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Not passable tile.");
+      this.blocked(lc);
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(lc) + " Event: Not passable tile.");
     }
     if(traverseStatus.entityOccupied && traverseStatus.tile.tileEntity !== bi) {
-      this.setStatus(logicContext, LogicBlockStatus.BLOCKED);
+      this.setStatus(lc, LogicBlockStatus.BLOCKED);
       // TODO set unblock strageties? // once those are exhausted, we have to end the block in failure.
-      logicContext.setLocalVariable(this.logicUnblockStrategiesId,
+      lc.setLocalVariable(this.logicUnblockStrategiesId,
         [
           // first we just wait, no moving back to center. if the tile clears move into it.
-          new WaitLogic(3600,
-            (logicContext:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() }
+          new WaitLogic(120,
+            (lc:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() }
           ),
-          // second try and plot a new course to target with reroute.
-          // TODO
-          // third continue waiting, then move back to center tile as we wait.
-          new WaitLogic(3600,
-          (logicContext:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() },
-          (logicContext:LogicContext) => { let nextTile = li.getMap().get(bi.tileX,bi.tileY);
+          // third continue waiting, then move back to center tile as we wait. 3600 ticks formerly
+          new WaitLogic(120,
+          (lc:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() },
+          (lc:LogicContext) => { let nextTile = li.getMap().get(bi.tileX,bi.tileY);
             let moveDirection =  TurretDirection.calculateTurretDirection(bi.getCenterX(),bi.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
             if( !(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextTile.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextTile.getCenterY(),moveDirection.speed))){
               bi.posX += moveDirection.speed * moveDirection.directionX;
@@ -138,18 +136,18 @@ export class MoveToLogic extends AbstractLogicBlock {
             }
           },
         )])
-      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: Tile Occupied by Entity");
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(lc) + " Event: Tile Occupied by Entity");
     }
   }
 
   /**
    * Will continue the on the path and center on the targetted tile
    */
-  private moveToCenter(logicContext:LogicContext, bi:BotInstance, nextTile: MapTile ): boolean {
-    let moveDirection:TurretDirection = this.getOrCreateTurret(logicContext,bi, nextTile);
+  protected moveToCenter(lc:LogicContext, bi:BotInstance, nextTile: MapTile ): boolean {
+    let moveDirection:TurretDirection = this.getOrCreateTurret(lc,bi, nextTile);
     if(LogicService.isDiffLessThanCalc(bi.getCenterX(),nextTile.getCenterX(),moveDirection.speed) && LogicService.isDiffLessThanCalc(bi.getCenterY(),nextTile.getCenterY(),moveDirection.speed)){
-      console.log("ID:"+this.logicId + " Status:"+this.getStatus(logicContext) + " Event: At center of tile.");
-      return this.complete(logicContext); // Complete, finish movement Logic.
+      console.log("ID:"+this.logicId + " Status:"+this.getStatus(lc) + " Event: At center of tile.");
+      return this.complete(lc); // Complete, finish movement Logic.
     } else { // nudge close to the center of the tile.
       moveDirection.update(bi.getCenterX(),bi.getCenterY());
       bi.posX += moveDirection.speed * moveDirection.directionX;
@@ -157,41 +155,136 @@ export class MoveToLogic extends AbstractLogicBlock {
     }
   }
 
-  getOrCreateTurret(logicContext:LogicContext, bi:BotInstance, nextTile: MapTile ):TurretDirection{
-    let moveDirection:TurretDirection = logicContext.getLocalVariable(this.moveDirectionVarId);
+  getOrCreateTurret(lc:LogicContext, bi:BotInstance, nextTile: MapTile ):TurretDirection{
+    let moveDirection:TurretDirection = lc.getLocalVariable(this.moveDirectionVarId);
     if ( moveDirection == null ) {
       moveDirection =  TurretDirection.calculateTurretDirection(bi.getCenterX(),bi.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
-      logicContext.setLocalVariable(this.moveDirectionVarId, moveDirection);
+      lc.setLocalVariable(this.moveDirectionVarId, moveDirection);
     }
     return moveDirection;
   }
 
-  private calcPath(logicContext: LogicContext) {
-    const bi = logicContext.getBotInstance();
+  protected calcPath(lc: LogicContext, points:Cords[]):MoveNode[] {
+    const bi = lc.getBotInstance();
+    const li = lc.levelInstance;
     let pathCal = [];
     let point0 = bi.getTileCords();
     let pointA = point0;
-    for(let i = 0; i < this.points.length; i++) {
-      let pointB = this.points[i];
-      const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,logicContext.levelInstance.getMap());
+    for(let i = 0; i < points.length; i++) {
+      let pointB = points[i];
+      // isolate a reachable point
+      if( !li.getMap().get(pointB.x,pointB.y).getTraverseStatus().passable ){ // pointB cannot be reached, use another point.
+        let {freeTile, freeTiles} = this.findFreeTiles(lc, pointB,true,1,3);
+        if(freeTile === null){
+          this.failure(lc);
+          return null;
+        } else {
+          pointB = freeTile.getCords();
+        }
+      }
+      const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,lc.levelInstance.getMap());
       path[path.length-1] = new KeyNode(path[path.length-1],pointB);
-      // TODO decision here, should we drop the path entirely or see if we can still reach the other points?
-      if(path != null) { // Dropping for now, perhaps we skip this point because its unreacable?
+      if(path != null) {
         pathCal = pathCal.concat(path);
         pointA = pointB;
       } else {
         console.error('Path not possible, dropping');
-        return;
+        this.failure(lc);
+        return null;
       }
     }
     if(pathCal != null && pathCal.length > 0 && pathCal[0] != null){
-      logicContext.setLocalVariable(this.pathVarId,new Opt(pathCal));
-      logicContext.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(bi.getTileCords(),pathCal[0]));
+      lc.setLocalVariable(this.pathVarId,new Opt(pathCal));
+      lc.setLocalVariable(this.headDirectionVarId, PathfinderService.getHeadingDirection(bi.getTileCords(),pathCal[0]));
+      return pathCal;
     } else {
-      // todo
       console.error('Path not possible');
+      this.failure(lc);
+      return null;
     }
   }
+
+  // Overiding so we can try and completely reroute, instead of partial reroute
+  failure(lc: LogicContext):boolean {
+    if(lc.getLocalVariable(this.logicStatusId) !== LogicBlockStatus.FAILURE) {
+      lc.setLocalVariable(this.logicStatusId,LogicBlockStatus.FAILURE);
+      // TODO handle loop paths, perhpas that should be done in Pattrol with its own failure method?
+      // one last ditch effort to reroute.
+      let nextKeyNode = this.findNextKeyNode(lc);
+      let potentialPath = this.calcPath(lc,this.points.slice(this.points.indexOf(nextKeyNode.pointCords)));
+      if(potentialPath !== null){
+        lc.setLocalVariable(this.logicStatusId,LogicBlockStatus.INPROGRESS);
+        lc.setLocalVariable(this.currentPointVarId,0);// back to the start of the new path!
+      } else { // we failed, start stays as failed, and the block is COMPLETE
+        lc.setLocalVariable(this.logicCompleteId,true);
+      }
+      // FYI for all of this to work, the failed wait stragety needs to actually end. Please review unblock logic in logicBlock again.
+    } else {
+      lc.setLocalVariable(this.logicCompleteId,true);
+    }
+    return true;
+  }
+
+
+  /**
+   *
+   * @param cords point to start searching from
+   * @param breakOnFirstFree return first free tile
+   * @param startIndex minimum 1 distance out from target cordinates
+   * @param dis How far out from the target tile are we prepared to search?
+   */
+  findFreeTiles(lc:LogicContext, cords:Cords, breakOnFirstFree=false, startIndex=1, dis=5):{freeTiles:MapTile[],freeTile:MapTile} {
+    const li = lc.levelInstance;
+    const {mapSizeX,mapSizeY} = li.getMap().getMapSize();
+    let freeTile:MapTile = null;
+    let freeTiles:MapTile[] = [];
+    loop:
+    for(let i = startIndex; i < dis || freeTile !== null; i++) {
+      let distance = 1 + (i*2);
+      let startingCords = { x:cords.x - i, y: cords.y - i };
+      let endingCords = { x:cords.x + distance, y: cords.y + distance };
+
+      // brute force it. // TODO refactor for performance.
+      for(let l = startingCords.x; l < endingCords.x; l++){
+        for(let k = startingCords.y; k < endingCords.y; k++){
+          if(l >= 0 && k >= 0 && l < mapSizeX && k < mapSizeY){ // boundary check
+            if( (l === startingCords.x || l === endingCords.x) && (k === startingCords.y || k === endingCords.y) ){
+              const tile = li.getMap().get(l,k);
+              if ( !tile.getTraverseStatus().entityOccupied && tile.getTraverseStatus().passable) {
+                freeTiles.push(tile);
+              }
+            }
+          }
+        }
+      }
+      // pick a random free tile
+      if(freeTiles.length > 0 && breakOnFirstFree){
+        // TODO pick a random one, so bots will split up.
+        freeTile = freeTiles[0];
+        break loop;
+      }
+    }
+    return {freeTiles:freeTiles, freeTile:freeTile}
+  }
+
+  // Its an existing path, so there must be nextKeyNodes, find the next one
+  findNextKeyNode(lc:LogicContext):KeyNode {
+    let pathOpt = lc.getLocalVariable(this.pathVarId);
+    let path = pathOpt.get();
+    let currentPoint = lc.getLocalVariableOrDefault(this.currentPointVarId,0);
+    let nextPoint = path[currentPoint];
+    // next key node
+    let nextKeyNode = nextPoint;
+    let tmp = currentPoint;
+    while(!(nextKeyNode instanceof KeyNode)) {
+      tmp++;
+      nextKeyNode = path[tmp];
+    }
+    return nextKeyNode;
+  }
+
+  // WIP ideas down here,
+
 
   /**
    * rerouting will factor in tile entities that might be blocking your path.
@@ -199,14 +292,15 @@ export class MoveToLogic extends AbstractLogicBlock {
    * Then plot a course there with tile entities included in the path cal.
    * If its not possible, then back to waiting
    */
-  private rerouteFull(logicContext: LogicContext){
-    const li = logicContext.levelInstance;
+  protected rerouteFull(lc: LogicContext){
+    const li = lc.levelInstance;
     const {mapSizeX,mapSizeY} = li.getMap().getMapSize();
-    const botInstance = logicContext.getBotInstance();
+    const botInstance = lc.getBotInstance();
+    const botCords = botInstance.getTileCords();
 
-    let pathOpt = logicContext.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
+    let pathOpt = lc.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
     let path = pathOpt.get();
-    let currentPoint = logicContext.getLocalVariableOrDefault(this.currentPointVarId,0);
+    let currentPoint = lc.getLocalVariableOrDefault(this.currentPointVarId,0);
     let nextPoint = path[currentPoint];
     // Starting from the current node,
     if(currentPoint === path.length) { // we are already on the last node... TODO So complete?
@@ -221,11 +315,10 @@ export class MoveToLogic extends AbstractLogicBlock {
       nextKeyNode = path[tmp];
     }
 
-    // find a free tile
-    let freeTile = null;
+    // find a fee tile
+    let freeTile:MapTile = null;
     loop:
     for(let i = 1; i < 5 || freeTile !== null; i++) { // if I cannot get within 5 tiles then its a failed path.
-      let botCords = botInstance.getTileCords();
       let distance = 1 + (i*2);
       let startingCords = { x:botCords.x - i, y: botCords.y - i };
       let endingCords = { x:botCords.x + distance, y: botCords.y + distance };
@@ -257,10 +350,14 @@ export class MoveToLogic extends AbstractLogicBlock {
     }
 
     // now I have a freetile, so create a new path from current node to free tile, if that fails, then we just continue to wait.
-    // const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,logicContext.levelInstance.getMap(), true);
+    let reRoutedPath:MoveNode[] = PathfinderService.getSinglePath(botCords.x,botCords.y,freeTile.x,freeTile.y,lc.levelInstance.getMap(), true);
+    let node = reRoutedPath[reRoutedPath.length-1];
+    reRoutedPath[reRoutedPath.length-1] = new KeyNode(node,new Cords(node.x,node.y));
 
+    // now map from this free tile back to somwhere on the original path,
+      // then update the original path current cordinates for this instance to that position
 
-
+    return reRoutedPath;
 
     // work out from the path, how many of the previous "points" have been hit. (Key Nodes)
       // now with the points that remain, are they reach able at the moment?
@@ -277,7 +374,7 @@ export class MoveToLogic extends AbstractLogicBlock {
       // this way the move logic is not affected, and if the path is clear next time, they will take the most direct route.1
       // if literally no path is possible, simply fail.
 
-    // const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,logicContext.levelInstance.getMap(), true);
+    // const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,lc.levelInstance.getMap(), true);
 
   }
 }

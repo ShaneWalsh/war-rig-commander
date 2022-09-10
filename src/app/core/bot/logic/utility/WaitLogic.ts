@@ -26,7 +26,7 @@ export class WaitLogic extends AbstractLogicBlock {
     let waitCounter = logicContext.getLocalVariableOrDefault(this.waitCounterVarId, 0);
     waitCounter = LogicService.incrementLoop(waitCounter, this.waitTicks);
     if(waitCounter == 0) { // we have gone full circle
-      if(this.breakWaitEarly != null)
+      if(this.breakWaitEarly != null) // TODO potentially reconsider this, because it will always fail if the break stragety fails, even when the wait is over, potentally stalling for ever
         this.failure(logicContext); // we failed to break out of the wait
       else
         this.complete(logicContext); // we successfully waited
