@@ -55,7 +55,6 @@ export enum TargetVariables {
     if(availableTargets !== null && availableTargets.length > 0) {
       let currentTarget = this.getCurrentTarget(availableTargets, closestTarget, logicContext);
       logicContext.setLocalVariable(TargetVariables.CURRENT_TARGET,currentTarget);
-      console.log("Set target")
     } else { // if there is no targets within range, then the person we are targetting must be out of range, so clear the target variable.
       logicContext.removeLocalVariable(TargetVariables.CURRENT_TARGET);
     }

@@ -122,11 +122,11 @@ export class MoveToLogic extends AbstractLogicBlock {
       lc.setLocalVariable(this.logicUnblockStrategiesId,
         [
           // first we just wait, no moving back to center. if the tile clears move into it.
-          new WaitLogic(120,
+          new WaitLogic(60,
             (lc:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() }
           ),
           // third continue waiting, then move back to center tile as we wait. 3600 ticks formerly
-          new WaitLogic(120,
+          new WaitLogic(60,
           (lc:LogicContext) => { return !traverseStatus.tile.optTileEntity().isPresent() },
           (lc:LogicContext) => { let nextTile = li.getMap().get(bi.tileX,bi.tileY);
             let moveDirection =  TurretDirection.calculateTurretDirection(bi.getCenterX(),bi.getCenterY(),nextTile.getCenterX(), nextTile.getCenterY(),2,true);
@@ -172,25 +172,36 @@ export class MoveToLogic extends AbstractLogicBlock {
     let pointA = point0;
     for(let i = 0; i < points.length; i++) {
       let pointB = points[i];
-      // isolate a reachable point
-      if( !li.getMap().get(pointB.x,pointB.y).getTraverseStatus().passable ){ // pointB cannot be reached, use another point.
-        let {freeTile, freeTiles} = this.findFreeTiles(lc, pointB,true,1,3);
-        if(freeTile === null){
+      // Extract the exist logic below into methods
+      // get to pointB?
+        // no find all free tiles, and begin trying to find a path to any of them.
+        // once we find one, stick with it
+      let path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,lc.levelInstance.getMap(), true);
+      if(path !== null){
+        path[path.length-1] = new KeyNode(path[path.length-1],pointB);
+        pathCal = pathCal.concat(path);
+        pointA = pointB
+      } else { // No joy, lets try and find a a free tile and path
+        let {freeTile, freeTiles} = this.findFreeTiles(lc, pointB,false,1,4);
+        if(freeTile === null){ // no free tiles at all, failure.
           this.failure(lc);
           return null;
-        } else {
-          pointB = freeTile.getCords();
         }
-      }
-      const path = PathfinderService.getSinglePath(pointA.x,pointA.y,pointB.x,pointB.y,lc.levelInstance.getMap());
-      path[path.length-1] = new KeyNode(path[path.length-1],pointB);
-      if(path != null) {
-        pathCal = pathCal.concat(path);
-        pointA = pointB;
-      } else {
-        console.error('Path not possible, dropping');
-        this.failure(lc);
-        return null;
+        loop:
+        for(let tile of freeTiles) {
+          path = PathfinderService.getSinglePath(pointA.x,pointA.y,tile.x,tile.y,lc.levelInstance.getMap(), true);
+          if(path != null) {
+            path[path.length-1] = new KeyNode(path[path.length-1],tile.getCords());
+            pathCal = pathCal.concat(path);
+            pointA = tile.getCords();
+            break loop;
+          }
+        }
+        if(path === null) {
+          console.error('Path not possible, dropping', lc);
+          this.failure(lc);
+          return null;
+        }
       }
     }
     if(pathCal != null && pathCal.length > 0 && pathCal[0] != null){
@@ -210,12 +221,21 @@ export class MoveToLogic extends AbstractLogicBlock {
       lc.setLocalVariable(this.logicStatusId,LogicBlockStatus.FAILURE);
       // TODO handle loop paths, perhpas that should be done in Pattrol with its own failure method?
       // one last ditch effort to reroute.
-      let nextKeyNode = this.findNextKeyNode(lc);
-      let potentialPath = this.calcPath(lc,this.points.slice(this.points.indexOf(nextKeyNode.pointCords)));
+      let potentialPath = null;
+      let pathOpt:Opt = lc.getLocalVariableOrDefault(this.pathVarId, Opt.empty());
+      if(!pathOpt.isPresent()) {
+        potentialPath = this.calcPath(lc,this.points);
+      } else {
+        let nextKeyNode = this.findNextKeyNode(lc, pathOpt.get());
+        const slicedPoints = this.points.slice(this.points.indexOf(nextKeyNode.pointCords));
+        potentialPath = this.calcPath(lc,slicedPoints);
+      }
       if(potentialPath !== null){
         lc.setLocalVariable(this.logicStatusId,LogicBlockStatus.INPROGRESS);
         lc.setLocalVariable(this.currentPointVarId,0);// back to the start of the new path!
-      } else { // we failed, start stays as failed, and the block is COMPLETE
+        lc.setLocalVariable(this.pathVarId, new Opt(potentialPath));
+      } else { // we failed, status stays as failed, and the block is COMPLETE
+        console.warn("Failed to reroute to target, failing Move To Logic");
         lc.setLocalVariable(this.logicCompleteId,true);
       }
       // FYI for all of this to work, the failed wait stragety needs to actually end. Please review unblock logic in logicBlock again.
@@ -238,39 +258,39 @@ export class MoveToLogic extends AbstractLogicBlock {
     const {mapSizeX,mapSizeY} = li.getMap().getMapSize();
     let freeTile:MapTile = null;
     let freeTiles:MapTile[] = [];
-    loop:
     for(let i = startIndex; i < dis || freeTile !== null; i++) {
-      let distance = 1 + (i*2);
       let startingCords = { x:cords.x - i, y: cords.y - i };
-      let endingCords = { x:cords.x + distance, y: cords.y + distance };
-
+      let endingCords = { x:cords.x + i, y: cords.y + i };
+      let tempTiles = []
       // brute force it. // TODO refactor for performance.
       for(let l = startingCords.x; l < endingCords.x; l++){
         for(let k = startingCords.y; k < endingCords.y; k++){
           if(l >= 0 && k >= 0 && l < mapSizeX && k < mapSizeY){ // boundary check
-            if( (l === startingCords.x || l === endingCords.x) && (k === startingCords.y || k === endingCords.y) ){
+            if( (l === startingCords.x || l === endingCords.x) || (k === startingCords.y || k === endingCords.y) ){
               const tile = li.getMap().get(l,k);
               if ( !tile.getTraverseStatus().entityOccupied && tile.getTraverseStatus().passable) {
-                freeTiles.push(tile);
+                tempTiles.push(tile);
               }
             }
           }
         }
       }
-      // pick a random free tile
-      if(freeTiles.length > 0 && breakOnFirstFree){
-        // TODO pick a random one, so bots will split up.
-        freeTile = freeTiles[0];
-        break loop;
+      // randomisze positions in tempTiles
+      freeTiles = freeTiles.concat(LogicService.shuffle(tempTiles));
+
+      // pick a random free tile @Deprecated logic
+      if(breakOnFirstFree && freeTiles.length > 0) {
+        freeTile = freeTiles[LogicService.getRandomInt(freeTiles.length)];
+        return {freeTiles:freeTiles, freeTile:freeTile};
       }
     }
+    if(freeTiles.length > 0)
+      freeTile = freeTiles[LogicService.getRandomInt(freeTiles.length)];
     return {freeTiles:freeTiles, freeTile:freeTile}
   }
 
   // Its an existing path, so there must be nextKeyNodes, find the next one
-  findNextKeyNode(lc:LogicContext):KeyNode {
-    let pathOpt = lc.getLocalVariable(this.pathVarId);
-    let path = pathOpt.get();
+  findNextKeyNode(lc:LogicContext, path:MoveNode[]):KeyNode {
     let currentPoint = lc.getLocalVariableOrDefault(this.currentPointVarId,0);
     let nextPoint = path[currentPoint];
     // next key node
