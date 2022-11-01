@@ -137,6 +137,15 @@ export class MoveNode {
     ){ }
 }
 
+
+export class TraversalOptions {
+  constructor(
+
+  ){
+
+  }
+}
+
 // TL, T, TR
 // L, NA, R
 // BL, B, BR

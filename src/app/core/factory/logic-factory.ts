@@ -39,4 +39,16 @@ export class LogicFactory {
     return botGoal;
   }
 
+  // create Melee logic, so when theres a target, we follow.
+  public static createMeleeCondition(points:Cords[]):BotGoal {
+    let move = new MoveToLogic(points);
+    let seq = new LogicSequence([move]);
+    let moveScen = new LogicScenario(seq,[]);
+    let botGoal = new BotGoalSimple(moveScen,LogicFactory.createSentryScenrio());
+
+    return botGoal;
+  }
+
+
+
 }

@@ -1,6 +1,7 @@
 
 
 import { LogicContext } from "../../manager/support/SharedContext";
+import { Opt } from "../../Opt";
 import { EntityState, TileEntity } from "../../TileEntity";
 
 export interface LogicCondition {
@@ -66,3 +67,21 @@ export class StateInactiveCondition implements LogicCondition {
 
 // distance/range
 //
+
+export class LocalVariableSetCondition implements LogicCondition {
+  constructor(public variableName: string){}
+  checkCondition(lc:LogicContext): boolean {
+    let v= lc.getLocalVariableOrDefault(this.variableName,null);
+    return (v === null || (v instanceof Opt && !v.isPresent()))? false : true;
+  }
+}
+
+export class LocalVariableNotSetCondition implements LogicCondition {
+  constructor(public variableName: string){}
+  checkCondition(lc:LogicContext): boolean {
+    let v= lc.getLocalVariableOrDefault(this.variableName,null);
+    return (v === null || (v instanceof Opt && !v.isPresent()))? true : false;
+  }
+}
+
+

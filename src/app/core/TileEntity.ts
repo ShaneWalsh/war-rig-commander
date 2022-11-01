@@ -3,7 +3,7 @@ import { Cords } from "./Cords";
 import { Drawer } from "./manager/support/display/Drawer";
 import { UiSettings } from "./manager/support/display/UiSettings";
 import { DrawingContext } from "./manager/support/SharedContext";
-import { LevelMap } from "./map/LevelMap";
+import { LevelMap, MapTile, TraversalComp } from "./map/LevelMap";
 
 export enum EntityState {
   // Sensors
@@ -29,7 +29,7 @@ export enum EntityState {
 /**
  * Anything than exists on a tile and is not just background. Unit, building etc
  */
- export interface TileEntity extends Drawer, HasTeam {
+ export interface TileEntity extends Drawer, HasTeam, TraversalComp {
   isPassable():boolean;
   toggleState(entityState:EntityState);
   setState(entityState: EntityState, bool:boolean);
@@ -39,6 +39,7 @@ export enum EntityState {
   getTileCords():{x:number,y:number};
   getCenterCords(uiSet:UiSettings): {x:number,y:number}
   getTileSizes():{tileSizeX:number,tileSizeY:number};
+  getBotTeam():BotTeam;
 }
 
 export abstract class AbsTileEntity implements TileEntity {
@@ -138,6 +139,14 @@ export abstract class AbsTileEntity implements TileEntity {
 
   getBotTeam():BotTeam {
     return this.botTeam;
+  }
+
+  canPassTerrain(mapTile: MapTile, options: any) {
+    throw new Error("Method not implemented.");
+  }
+
+  canPassEntity(tileEntity: TileEntity, options: any) {
+    throw new Error("Method not implemented.");
   }
 
   abstract draw(drawingContext: DrawingContext);

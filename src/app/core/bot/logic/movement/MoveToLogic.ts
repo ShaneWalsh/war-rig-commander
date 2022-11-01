@@ -11,6 +11,10 @@ import { TurretDirection } from "../../rotation/BulletDirection";
 import { AbstractLogicBlock, LogicBlockStatus } from "../LogicBlock";
 import { WaitLogic } from "../utility/WaitLogic";
 
+// TODO
+// Fix failure pathing for Loops, could be done in Patrol logic override
+// Enhance the "Is free/passable" logic, should be able to provide a class with all my details and what I can and cnnot pass, then pathing should use this for its path finding algorithm.
+  // I should be able to pass in traversal options, combined with treverseStatus an engine should determine what to do.
 
 export class MoveToLogic extends AbstractLogicBlock {
   firstLoad(lc: LogicContext) {

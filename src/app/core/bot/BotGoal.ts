@@ -56,7 +56,7 @@ export class LogicScenario {
   checkScenario(logicContext:LogicContext):LogicScenario {
     for(let i = 0; i < this.possibleScenarios.length; i++) {
       const possibleScenario = this.possibleScenarios[i];
-      if(possibleScenario.con.checkCondition(logicContext)){
+      if(possibleScenario.con.checkCondition(logicContext)) {
         possibleScenario.scen.loadScenario(logicContext);
         return possibleScenario.scen;
       }

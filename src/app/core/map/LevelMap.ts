@@ -1,5 +1,6 @@
 import { LogicService } from 'src/app/services/logic.service';
 import { BotMissile } from '../bot/BotMissile';
+import { BotTeam } from '../bot/BotTeam';
 import { Cords } from '../Cords';
 import { Drawer } from '../manager/support/display/Drawer';
 import { UiSettings } from '../manager/support/display/UiSettings';
@@ -215,15 +216,19 @@ export class MapTile {
 
   getTraverseStatus(): TraverseStatus {
     // TODO update this object when things change rather than building it every time.
+    let entityOccupied = false;
+    let entityTeam = null;
+    if( this.optTileEntity().isPresent() ) {
+      entityOccupied = true;
+      entityTeam = this.optTileEntity().get().getBotTeam()
+    }
+
     return new TraverseStatus(
       this,
       this.passable,
-      false,
-      false, // construct
-      false,
-      false, // item
-      this.optTileEntity().isPresent(),
-      false // entity
+      entityOccupied,
+      entityTeam,
+      false
     );
   }
 
@@ -248,11 +253,17 @@ export class TraverseStatus {
   constructor(
     public tile: MapTile,
     public passable: boolean = true,
-    public constructOccupied: boolean = false,
-    public constructCrushable: boolean = false,
-    public itemOccupied: boolean = false,
-    public itemCrushable: boolean = false,
     public entityOccupied: boolean = false,
+    public entityTeam: BotTeam = null,
     public entityCrushable: boolean = false
   ) {}
+}
+
+// add options support, so some of the logic can be overridden, like ignore everything, because its invincible or something.
+// or its desprite, or it can do ram damage and so will happily charge into any opposing team bot.
+// tile entities can implment this differently
+// The point being basically, what does this entity consider to be a passable tile, at this time.
+export interface TraversalComp {
+  canPassTerrain(mapTile:MapTile, options);
+  canPassEntity(tileEntity:TileEntity, options);
 }
