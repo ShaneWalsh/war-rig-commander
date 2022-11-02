@@ -1,1 +1,11 @@
-<p>Welcome to the game</p>
+
+<ng-container *ngIf="activeMenu == 'Main'">
+  <div class="box content-center ">
+    <button type="button" (click)="startNewGameHandler()" clickable>Start a new Game</button>
+  </div>
+</ng-container>
+<ng-container *ngIf="activeMenu == 'GameOverview'">
+  <app-game-overview></app-game-overview>
+</ng-container>
+
+

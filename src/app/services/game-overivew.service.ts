@@ -13,9 +13,9 @@ export class GameOverivewService {
   constructor() { }
 
   public get menuChangeSubject$(): Observable<GameMenus> {
-    return this.MenuChangeSubject.asObservable();
+    return this.menuChangeSubject.asObservable();
   }
-  MenuChangeSubject: Subject<GameMenus> = new Subject();
+  public menuChangeSubject: Subject<GameMenus> = new Subject();
 }
 
 // Quests Menu? long running, spanning planets etc?

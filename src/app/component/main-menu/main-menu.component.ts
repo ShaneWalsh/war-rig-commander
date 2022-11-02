@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GameDataService } from 'src/app/services/game-data.service';
 import { MainMenuService, MenusTypes } from 'src/app/services/main-menu.service';
 
 /**
@@ -16,7 +17,7 @@ export class MainMenuComponent implements OnInit {
 
   public activeMenu:MenusTypes = MenusTypes.Main;
 
-  constructor( public mainMenuService:MainMenuService ) {
+  constructor( public mainMenuService:MainMenuService, public gameDataService:GameDataService ) {
 
   }
 
@@ -27,7 +28,10 @@ export class MainMenuComponent implements OnInit {
   }
 
   // main menu
-  //
+  startNewGameHandler() {
+    this.gameDataService.startNewGame();
+    this.mainMenuService.menuChangeSubject.next(MenusTypes.GameOverview);
+  }
 
 }
 

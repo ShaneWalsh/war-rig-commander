@@ -1,1 +1,84 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import "assets/css/skeleton.css";
+@import "assets/css/normalize.css";
+
+.glow {
+  background-color: gold;
+}
+
+body {
+  background-color: gray;
+  background-image: url("assets/image/bg/gif2.gif");
+  background-repeat: repeat;
+
+}
+
+.content-center {
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+
+/* https://stackoverflow.com/questions/14387690/how-can-i-show-only-corner-borders */
+/* overriding variables example.
+<div class="box-sides" style="--c:blue;--w:40px;--b:2px">
+<h1>some content</h1>
+</div> */
+/*
+<div class="box"> </div>
+<div class="box-sides"> </div>
+<div class="box-top-bottom"> </div>
+*/
+.box {
+  --b: 2px;   /* thickness of the border */
+  --c: white;   /* color of the border */
+  --w: 13px;  /* width of border */
+
+  border: var(--b) solid #0000; /* space for the border */
+  --_g: #0000 90deg,var(--c) 0;
+  --_p: var(--w) var(--w) border-box no-repeat;
+  background:
+    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+    conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+    conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p),
+    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+
+  margin: 5px;
+}
+
+.box-top-bottom {
+  --b: 2px;   /* thickness of the border */
+  --c: white;   /* color of the border */
+  --w: 5%;  /* width of border */
+  --l: 100%;  /* length of long line border */
+
+  border: var(--b) solid #0000; /* space for the border */
+  --_g: #0000 90deg,var(--c) 0;
+  --_p: var(--l) var(--w) border-box no-repeat;
+  background:
+    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+    conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+    conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p),
+    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+
+  margin: 5px;
+}
+
+.box-sides {
+  --b: 2px;   /* thickness of the border */
+  --c: white;   /* color of the border */
+  --w: 1%;  /* width of border */
+  --l: 100%;  /* length of long line border */
+
+  border: var(--b) solid #0000; /* space for the border */
+  --_g: #0000 90deg,var(--c) 0;
+  --_p: var(--w) var(--l) border-box no-repeat;
+  background:
+    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+    conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+    conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p),
+    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+
+  margin: 5px;
+}

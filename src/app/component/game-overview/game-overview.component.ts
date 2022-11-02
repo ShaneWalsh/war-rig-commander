@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GameDataService } from 'src/app/services/game-data.service';
 import { GameMenus, GameOverivewService } from 'src/app/services/game-overivew.service';
 import { MenusTypes } from 'src/app/services/main-menu.service';
 
@@ -17,12 +18,16 @@ export class GameOverviewComponent implements OnInit {
 
   public activeMenu:GameMenus = GameMenus.GameOverview;
 
-  constructor(public gameOverivewService:GameOverivewService) { }
+  constructor(public gameOverivewService:GameOverivewService, public gameDataService:GameDataService) { }
 
   ngOnInit(): void {
     this.gameOverivewService.menuChangeSubject$.subscribe((menu:GameMenus) => {
       this.activeMenu = menu;
     });
+  }
+
+  showOperations(){
+    this.gameOverivewService.menuChangeSubject.next(GameMenus.GameMissionsAvailable);
   }
 
 }

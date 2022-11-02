@@ -9,9 +9,9 @@ export class MainMenuService {
   constructor() { }
 
   public get menuChangeSubject$(): Observable<MenusTypes> {
-    return this.MenuChangeSubject.asObservable();
+    return this.menuChangeSubject.asObservable();
   }
-  MenuChangeSubject: Subject<MenusTypes> = new Subject();
+  public menuChangeSubject: Subject<MenusTypes> = new Subject();
 }
 
 export enum MenusTypes {
