@@ -1,0 +1,27 @@
+.selected {
+ background-color: #999999 !important;
+}
+
+/* #336699 #666666 #999999 */
+
+.card {
+  background-color: #666666;
+  display: block;
+}
+
+.card p {
+  font-size: smaller;
+  margin-bottom: 0px;
+}
+
+.mission-select {
+
+}
+
+.mission-desc {
+
+}
+
+.card-title {
+  font-weight: bold;
+}

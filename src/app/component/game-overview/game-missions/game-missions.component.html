@@ -1,1 +1,32 @@
-<p>game-missions works!</p>
+
+<div class="row">
+  <div class="four columns">
+    <div class="mission-select">
+      <ng-container *ngFor="let mission of missionsAvailable">
+        <div class="box card" (click)="selectMission(mission)" [ngClass]="{'selected': mission === selectedMission}">
+          <div class="row">
+            <div class="two columns">One</div>
+            <div class="four columns">
+              <p class="card-title">{{mission.title}}</p>
+              <p>Pay : {{mission.getTotalPay()}}</p>
+              <p>Salvage : {{mission.salvage}}</p>
+            </div>
+            <div class="six columns">
+              <p>Resistence : {{mission.resistence}}</p>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  <div class="eight columns">
+    <div class="mission-desc">
+      <ng-container *ngIf="selectedMission !== null">
+        <div class="box card">
+          {{selectedMission.title}}
+
+        </div>
+      </ng-container>
+    </div>
+  </div>

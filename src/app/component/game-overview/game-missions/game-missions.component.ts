@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GameDataService } from 'src/app/services/game-data.service';
+import { GameDataService, MissionTemplate } from 'src/app/services/game-data.service';
 import { GameOverivewService } from 'src/app/services/game-overivew.service';
 
 @Component({
@@ -9,7 +9,8 @@ import { GameOverivewService } from 'src/app/services/game-overivew.service';
 })
 export class GameMissionsComponent implements OnInit {
 
-  public missionsAvailable;
+  public missionsAvailable:MissionTemplate[];
+  public selectedMission:MissionTemplate = null;
 
   constructor( public gameOverivewService:GameOverivewService, public gameDataService:GameDataService ) { }
 
@@ -17,6 +18,8 @@ export class GameMissionsComponent implements OnInit {
     this.missionsAvailable = this.gameDataService.getMissionsAvailable();
   }
 
-
+  selectMission(mission:MissionTemplate){
+    this.selectedMission = mission;
+  }
 
 }

@@ -9,21 +9,33 @@ import { Injectable } from '@angular/core';
 })
 export class GameDataService {
 
-  public playerData:PlayerData;
-  public gameData:GameData;
+  protected playerData:PlayerData;
+  protected gameData:GameData;
 
-  constructor() { }
+  constructor() {
+
+  }
+
   // OOS
   // load data, browser Json? Can we really store this much data?
   // save data
 
+  getPlayerData(){ // I do not like exposing this, but for ease right now...
+    return this.playerData;
+  }
+
   startNewGame() {
     this.playerData = new PlayerData();
     this.gameData = new GameData();
+    this.setTestData();
   }
 
   getMissionsAvailable() {
     return this.gameData.missionsAvailable;
+  }
+
+  setTestData() {
+    this.gameData.updateAvailableMissions();
   }
 
 }
@@ -77,7 +89,7 @@ export class GameData {
    * Generated for each world you land on, and as days go on more generate.
    * There can also be missions from other worlds, which will require travel.
    */
-  public missionsAvailable
+  public missionsAvailable: MissionTemplate[] = [];
   // companies (rivials, player)
   // shop data
   // game pilots (including player pilots)
@@ -90,6 +102,9 @@ export class GameData {
 
   // update world data with last mission results
   // update the world data for passage of a day
+  updateAvailableMissions(){
+    this.missionsAvailable = [new MissionTemplate(),new MissionTemplate("Find and Seek!")]
+  }
 }
 
 /**
@@ -110,16 +125,50 @@ export class MissionTemplate {
 
 // weight restrictions? Putting in weight seems a bit, MC ish.
   constructor(
-    public title:string="Mission Name",
-    public payment:number=100000,
+    public title:string="Seek and Destroy",
     public salvage:number=10,// 0-25?
     public favourSwing:number=2, // positive for one faction, negative for another, unless its a spy mission.
     public missionType:MissionType=MissionType.Battle,
     public resistence:number=1, // how hard should this mission be, In theory... 1-10?
     public deployZones:number=1, // 1-3
-    // Objectives
+    public objectives:MissionObjective[]=[new MissionObjective()]
     // Story, which faction is fighting which. What are your orders.
-  ) {}
+  ) {
+
+  }
+
+  getTotalPay(){
+    return this.objectives.reduce((accumulator, obj) => {
+      return accumulator + obj.payment;
+    }, 0);
+  }
 
 }
 
+export enum MissionObjectiveStatus {
+  Outstanding="Outstanding",
+  Success="Success",
+  Failed="Failed",
+  Cancelled="Cancelled",
+}
+
+export enum MissionObjectiveType {
+  Destroy="Destroy",
+
+}
+
+/**
+ * Will need to be extended for the different objectives, and for tracking when objectives are completed etc.
+ */
+export class MissionObjective {
+  constructor(
+      public description:string="Find and destroy all opposition WarRigs.",
+      public mandatory:boolean=true,
+      public payment:number = 100000,
+      public objectiveType:MissionObjectiveType = MissionObjectiveType.Destroy,
+      public fakeMission:boolean=false, // sometimes their will be inaccurate objectives that will change at run time.
+      public hidden:boolean=false, // sometimes their will be hidden objectives
+      public revealed:boolean=true, // visible as an objective.
+      public status:MissionObjectiveStatus = MissionObjectiveStatus.Outstanding
+    ) {}
+}
