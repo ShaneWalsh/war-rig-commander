@@ -16,7 +16,7 @@
       <h1>side bar important details of things like money</h1>
 
       <button type="button" (click)="showOperations()" clickable>Operations</button>
-      <button type="button" (click)="showOperations()" clickable>Rig Hold</button>
+      <button type="button" (click)="showRigHold()" clickable>Rig Hold</button>
       <button type="button" (click)="showOperations()" clickable>Runner Management</button>
 
     </div>
@@ -27,6 +27,9 @@
     </ng-container>
     <ng-container *ngIf="activeMenu == 'GameMissionsAvailable'">
       <app-game-missions></app-game-missions>
+    </ng-container>
+    <ng-container *ngIf="activeMenu == 'GameRigEditor'">
+      <app-rig-hold></app-rig-hold>
     </ng-container>
   </div>
 </div>

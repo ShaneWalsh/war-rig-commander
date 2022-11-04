@@ -6,6 +6,7 @@ import { GameContainerComponent } from './component/game-container/game-containe
 import { MainMenuComponent } from './component/main-menu/main-menu.component';
 import { GameOverviewComponent } from './component/game-overview/game-overview.component';
 import { GameMissionsComponent } from './component/game-overview/game-missions/game-missions.component';
+import { RigHoldComponent } from './component/game-overview/rig-hold/rig-hold.component';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { GameMissionsComponent } from './component/game-overview/game-missions/g
     GameContainerComponent,
     MainMenuComponent,
     GameOverviewComponent,
-    GameMissionsComponent
+    GameMissionsComponent,
+    RigHoldComponent
   ],
   imports: [
     BrowserModule

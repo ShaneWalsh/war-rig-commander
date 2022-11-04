@@ -30,4 +30,8 @@ export class GameOverviewComponent implements OnInit {
     this.gameOverivewService.menuChangeSubject.next(GameMenus.GameMissionsAvailable);
   }
 
+  showRigHold(){
+    this.gameOverivewService.menuChangeSubject.next(GameMenus.GameRigEditor);
+  }
+
 }
