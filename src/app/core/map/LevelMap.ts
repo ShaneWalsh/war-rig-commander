@@ -24,11 +24,11 @@ export class LevelMap implements Drawer, LogicProcess {
     for (let i = 0; i < this.mapSizeX; i++) {
       this.map[i] = new Array();
       for (let j = 0; j < this.mapSizeY; j++) {
-        randomnessCounter++;
+         randomnessCounter++; // Lets go all green for a while.
         if (randomnessCounter >= randomness) {
           this.map[i][j] = new MapTile(this, i, j, '#00FFFF', false);
           randomnessCounter = 0;
-          randomness = Math.floor(Math.random() * 10 + 1);
+          randomness = Math.floor(Math.random() * 100 + 1);
         } else {
           this.map[i][j] = new MapTile(this, i, j, '#00FF00');
         }

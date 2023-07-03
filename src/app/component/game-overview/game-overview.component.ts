@@ -34,4 +34,8 @@ export class GameOverviewComponent implements OnInit {
     this.gameOverivewService.menuChangeSubject.next(GameMenus.GameRigEditor);
   }
 
+  showRunnerPit(){
+    this.gameOverivewService.menuChangeSubject.next(GameMenus.GamePilotManagement);
+  }
+
 }

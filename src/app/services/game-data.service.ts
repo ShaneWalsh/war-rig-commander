@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BotInstance } from '../core/bot/BotInstance';
 
 /**
  * Holds all of the Game data
@@ -161,14 +162,17 @@ export enum MissionObjectiveType {
  * Will need to be extended for the different objectives, and for tracking when objectives are completed etc.
  */
 export class MissionObjective {
+  public status:MissionObjectiveStatus = MissionObjectiveStatus.Outstanding;
   constructor(
       public description:string="Find and destroy all opposition WarRigs.",
       public mandatory:boolean=true,
       public payment:number = 100000,
       public objectiveType:MissionObjectiveType = MissionObjectiveType.Destroy,
-      public fakeMission:boolean=false, // sometimes their will be inaccurate objectives that will change at run time.
+      // public fakeMission:boolean=false, // sometimes their will be inaccurate objectives that will change at run time.
       public hidden:boolean=false, // sometimes their will be hidden objectives
       public revealed:boolean=true, // visible as an objective.
-      public status:MissionObjectiveStatus = MissionObjectiveStatus.Outstanding
-    ) {}
+    ) {
+
+    }
 }
+

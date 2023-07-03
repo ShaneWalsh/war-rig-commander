@@ -17,7 +17,7 @@
 
       <button type="button" (click)="showOperations()" clickable>Operations</button>
       <button type="button" (click)="showRigHold()" clickable>Rig Hold</button>
-      <button type="button" (click)="showOperations()" clickable>Runner Management</button>
+      <button type="button" (click)="showRunnerPit()" clickable>Runner Pit</button>
 
     </div>
   </div>
@@ -30,6 +30,9 @@
     </ng-container>
     <ng-container *ngIf="activeMenu == 'GameRigEditor'">
       <app-rig-hold></app-rig-hold>
+    </ng-container>
+    <ng-container *ngIf="activeMenu == 'GamePilotManagement'">
+      <app-runner-pit></app-runner-pit>
     </ng-container>
   </div>
 </div>
